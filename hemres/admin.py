@@ -1,3 +1,6 @@
 from django.contrib import admin
+from .models import JaneusSubscriber, EmailSubscriber, MailingList
 
-# Register your models here.
+admin.site.register(JaneusSubscriber)
+admin.site.register(EmailSubscriber)
+admin.site.register(MailingList)
