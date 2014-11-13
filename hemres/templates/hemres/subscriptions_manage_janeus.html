@@ -1,0 +1,37 @@
+{% extends 'hemres/base.html' %}
+{% block content %}
+<h1>Nieuwsbrieven</h1>
+
+<form action="" method="post">{% csrf_token %}
+<fieldset>
+<div><p>Op deze pagina wijzig je de abonnementen van lid <strong>{{ object.name }}</strong> (lidnummer {{ object.member_id }}).</p></div>
+{{ form.non_field_errors }}
+{% for f in form.visible_fields %}
+<div class="row">
+<div class="cell">
+{{ f.label_tag }}
+</div>
+<div class="cell">
+{% if f.errors %}
+<span class="errors">{{ f.errors.as_text }}</span>
+{% endif %}
+{{ f }}
+</div>
+</div>
+{% endfor %}
+{% if auto_subscriptions %}
+<div><p>Op de volgende nieuwsbrieven ben je automatisch geabonneerd:</p></div>
+<ul>
+{% for s in auto_subscriptions %}
+<li>{{ s }}</li>
+{% endfor %}
+</ul>
+{% endif %}
+<div style="margin-top: 4px">
+<button class="button" type="submit">Opslaan</button>
+</div>
+</fieldset>
+</form>
+</div>
+
+{% endblock %} 

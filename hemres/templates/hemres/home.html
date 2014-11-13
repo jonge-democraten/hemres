@@ -1,0 +1,32 @@
+{% extends 'hemres/base.html' %}
+{% block content %}
+<h1>Nieuwsbrieven</h1>
+
+<!--<div><a href="#">Nieuwsbrievenarchief</a></div>
+<h1>Beheren van je abonnementen</h1>-->
+
+<form action="" method="post">{% csrf_token %}
+<fieldset>
+<div><p>Vul hieronder je emailadres in om een link te krijgen waarmee je je aan kunt melden voor de nieuwsbrieven van de Jonge Democraten en waarmee je je abonnementen kunt wijzigen.</p></div>
+{{ form.non_field_errors }}
+{% for f in form.visible_fields %}
+<div class="row">
+<div class="cell">
+{{ f.label_tag }}
+</div>
+<div class="cell">
+{% if f.errors %}
+<span class="errors">{{ f.errors.as_text }}</span>
+{% endif %}
+{{ f }}
+</div>
+</div>
+{% endfor %}
+<div style="margin-top: 4px">
+<button class="button" type="submit">Doorgaan</button>
+</div>
+</fieldset>
+</form>
+</div>
+
+{% endblock %} 
