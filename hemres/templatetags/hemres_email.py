@@ -31,3 +31,26 @@ def emailimage_static(context, image):
         context['emailimages'][image] = (mime, image_cid[1:-1])
 
     return "cid:{}".format(context['emailimages'][image][1])
+
+
+class EmptyNode(template.Node):
+    def render(self, context):
+        return ""
+
+
+@register.tag
+def limit_tags(parser, token):
+    bits = token.contents.split()[1:]
+    for s in parser.tags.keys():
+        if s not in bits:
+            del parser.tags[s]
+    return EmptyNode()
+
+
+@register.tag
+def limit_filters(parser, token):
+    bits = token.contents.split()[1:]
+    for s in parser.filters.keys():
+        if s not in bits:
+            del parser.filters[s]
+    return EmptyNode()
