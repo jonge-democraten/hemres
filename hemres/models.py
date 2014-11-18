@@ -8,6 +8,8 @@ from django.utils.encoding import python_2_unicode_compatible
 from janeus import Janeus
 import re
 
+from .utils import HashFileField
+
 
 @python_2_unicode_compatible
 class Subscriber(models.Model):
@@ -141,3 +143,55 @@ class MailingList(models.Model):
 
     def __str__(self):
         return self.name
+
+
+@python_2_unicode_compatible
+class NewsletterFile(models.Model):
+    # as foreign key in M2M files form NewsletterTemplate, and NewsletterAttachment
+
+    file = HashFileField(upload_to='hemres/files/{}')
+    filename = models.CharField(max_length=255)
+    description = models.CharField(max_length=255, blank=True, null=True)
+
+    def __str__(self):
+        return self.filename
+
+
+@python_2_unicode_compatible
+class NewsletterTemplate(models.Model):
+    title = models.CharField(max_length=255)
+    template = models.TextField()
+    files = models.ManyToManyField(NewsletterFile, through='TemplateAttachment')
+
+    # template will be copied to Newsletter
+    # each file in files will be a new NewsletterAttachment
+
+    def __str__(self):
+        return self.title
+
+
+class TemplateAttachment(models.Model):
+    template = models.ForeignKey(NewsletterTemplate)
+    file = models.ForeignKey(NewsletterFile)
+    attach_to_email = models.BooleanField(default=True)
+    content_id = models.CharField(max_length=255)
+
+
+@python_2_unicode_compatible
+class Newsletter(models.Model):
+    template = models.TextField()  # copied from NewsletterTemplate
+    files = models.ManyToManyField(NewsletterFile, through='NewsletterAttachment')  # initial copied from NewsletterTemplate, attach by default
+    subject = models.CharField(max_length=255)
+    content = models.TextField(blank=True)
+    date = models.DateTimeField(auto_now_add=True, blank=True)
+    public = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.subject
+
+
+class NewsletterAttachment(models.Model):
+    newsletter = models.ForeignKey(Newsletter)
+    file = models.ForeignKey(NewsletterFile)
+    attach_to_email = models.BooleanField(default=True)
+    content_id = models.CharField(max_length=255)
