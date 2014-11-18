@@ -105,7 +105,7 @@ class EmailSubscriberAccessToken(models.Model):
     subscriber = models.OneToOneField(EmailSubscriber, related_name='token')
     expiration_date = models.DateTimeField(default=create_expiration_date)
 
-    def get_url(self):
+    def get_absolute_url(self):
         return reverse('subscriptions_email', kwargs={'subscriber': self.pk, 'token': self.token})
 
     def __unicode__(self):
@@ -117,7 +117,7 @@ class JaneusSubscriberAccessToken(models.Model):
     subscriber = models.OneToOneField(JaneusSubscriber, related_name='token')
     expiration_date = models.DateTimeField(default=create_expiration_date)
 
-    def get_url(self):
+    def get_absolute_url(self):
         return reverse('subscriptions_janeus', kwargs={'subscriber': self.pk, 'token': self.token})
 
     def __unicode__(self):

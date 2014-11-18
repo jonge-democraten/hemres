@@ -6,11 +6,11 @@ je abonnementen wilt wijzigen.</p>
 
 {% for t in janeus_subscriber_tokens %}
 <p>Volgens onze gegevens hoort jouw emailadres bij lid <strong>{{ t.subscriber.name }}</strong> (lidnummer {{ t.subscriber.member_id }}).
-Je kunt je nieuwsbriefabonnementen beheren via <a href="{{ t.get_url }}">deze link</a>.</p>
+Je kunt je nieuwsbriefabonnementen beheren via <a href="{{ absolute_uri }}{{ t.get_absolute_url }}">deze link</a>.</p>
 {% endfor %}
 
 {% for t in email_subscriber_tokens %}
-<p>Voor het emailadres &quot;{{ t.subscriber.email }}&quot; kun je de nieuwsbriefabonnementen beheren via <a href="{{ t.get_url }}">deze link</a>.</p>
+<p>Voor het emailadres &quot;{{ t.subscriber.email }}&quot; kun je de nieuwsbriefabonnementen beheren via <a href="{{ absolute_uri }}{{ t.get_absolute_url }}">deze link</a>.</p>
 {% endfor %}
 
 <p>Met vrijzinnige groet,<br/>
