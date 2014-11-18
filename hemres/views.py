@@ -1,8 +1,8 @@
 from django.conf import settings
-from django.core.mail import EmailMessage
+from django.core.mail import EmailMultiAlternatives
 from django.core.urlresolvers import reverse
 from django.db import transaction
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.utils import timezone
@@ -31,12 +31,19 @@ def view_home(request):
     if request.method == 'POST':
         if form.is_valid():
             email = form.cleaned_data['email']
-            email_to_send = compose_mail(email)
             if getattr(settings, 'SKIP_EMAIL', False):
-                return render(request, 'hemres/subscriptions_fakemail.html', {'email': email_to_send})
+                email_to_send, attachments = compose_mail(email, False, request=request)
+                return HttpResponse(email_to_send, content_type='text/html')
+            email_to_send, attachments = compose_mail(email, True, request=request)
             subject = 'Jonge Democraten Nieuwsbrieven'
             from_email = 'noreply@jongedemocraten.nl'
-            msg = EmailMessage(subject, email_to_send, from_email=from_email, to=[email])
+            msg = EmailMultiAlternatives(subject=subject, body=email_to_send,
+                                         from_email=from_email, to=[email])
+            # msg.attach_alternative(email_to_send, "text/html")
+            msg.content_subtype = "html"
+            msg.mixed_subtype = 'related'
+            for a in attachments:
+                msg.attach(a)
             msg.send()
 
             return render(request, 'hemres/subscriptions_emailsent.html', {'email': email})
@@ -112,7 +119,7 @@ def create_fresh_email_token(subscriber):
 
 
 @transaction.atomic
-def compose_mail(emailaddress):
+def compose_mail(emailaddress, embed=True, request=None):
     # find Janeus users
     if hasattr(settings, 'JANEUS_SERVER'):
         janeus_subscribers = [make_janeus_subscriber(s) for s in Janeus().lidnummers(emailaddress)]
@@ -136,5 +143,9 @@ def compose_mail(emailaddress):
 
     context = {'janeus_subscriber_tokens': janeus_subscribers_tokens,
                'email_subscriber_tokens': email_subscribers_tokens,
+               'emailimages': {},
+               'emailimages_embed': embed,
+               'absolute_uri': request.build_absolute_uri(''),
                'name': name}
-    return render_to_string('hemres/email.html', context)
+    result = render_to_string('hemres/email.html', context)
+    return result, [mime for mime, cid in context['emailimages'].itervalues()]

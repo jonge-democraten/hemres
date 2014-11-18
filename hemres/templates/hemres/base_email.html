@@ -1,0 +1,23 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>{% block title %}Jonge Democraten Nieuwsbrieven{% endblock %}</title>
+        <style type="text/css">
+            body { margin: 0; padding: 0; }
+            p { margin: 0 0 1em 0; padding: 0; }
+            h1, h2, h3, h4, h5, h6 { color: black !important; line-height: 100%; }
+            a, a:link { color: #99b44a; text-decoration: underline; }
+            img { outline: none; text-decoration: none; }
+            a img { border: none; }
+            table td { border-collapse: collapse; }
+
+            body { background: #00; min-height: 1000px; color: #black; font-family: Arial, Helvetica, sans-serif; font-size: 12px; }
+            #content { width: 670px; margin: 20px auto; }
+        </style>
+    </head>
+    <body>
+        <div id="content">{% block content %}{% endblock %}</div>
+    </body>
+</html>

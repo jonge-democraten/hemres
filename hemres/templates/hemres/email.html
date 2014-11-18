@@ -1,3 +1,9 @@
+{% extends 'hemres/base_email.html' %}
+{% load hemres_email %}
+{% block title %}Jonge Democraten Nieuwsbrieven{% endblock %}
+{% block content %}
+<div style="display: block; margin-bottom: 8px;"><img src="{% emailimage_static 'hemres/images/JongeDemocraten.png' %}" width="316" height="100px"  border="0" /></div>
+
 <p>Beste {% if name %}{{name}}{% else %}geïnteresseerde{% endif %},</p>
 
 <p>Via de website van de Jonge Democraten heb je aangegeven dat je je wilt abonneren
@@ -15,3 +21,4 @@ Je kunt je nieuwsbriefabonnementen beheren via <a href="{{ absolute_uri }}{{ t.g
 
 <p>Met vrijzinnige groet,<br/>
 De Jonge Democraten.</p>
+{% endblock %}
