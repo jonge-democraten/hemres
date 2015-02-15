@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+from future.builtins import open
 from django import template
 from django.contrib.staticfiles import finders
 from django.core.mail import make_msgid
@@ -41,7 +43,7 @@ class EmptyNode(template.Node):
 @register.tag
 def limit_tags(parser, token):
     bits = token.contents.split()[1:]
-    for s in parser.tags.keys():
+    for s in list(parser.tags.keys()):
         if s not in bits:
             del parser.tags[s]
     return EmptyNode()
@@ -50,7 +52,7 @@ def limit_tags(parser, token):
 @register.tag
 def limit_filters(parser, token):
     bits = token.contents.split()[1:]
-    for s in parser.filters.keys():
+    for s in list(parser.filters.keys()):
         if s not in bits:
             del parser.filters[s]
     return EmptyNode()

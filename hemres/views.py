@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+from future.builtins import int
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.core.urlresolvers import reverse
@@ -148,4 +150,4 @@ def compose_mail(emailaddress, embed=True, request=None):
                'absolute_uri': request.build_absolute_uri('').strip('/'),
                'name': name}
     result = render_to_string('hemres/subscriptions_email.html', context)
-    return result, [mime for mime, cid in context['emailimages'].itervalues()]
+    return result, [mime for mime, cid in list(context['emailimages'].values())]

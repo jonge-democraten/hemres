@@ -1,11 +1,15 @@
+from __future__ import unicode_literals
+from future.builtins import str
 from datetime import timedelta
 from django.db import models, transaction
 from django.core.urlresolvers import reverse
 from django.utils import timezone
+from django.utils.encoding import python_2_unicode_compatible
 from janeus import Janeus
 import re
 
 
+@python_2_unicode_compatible
 class Subscriber(models.Model):
     name = models.CharField(max_length=255, blank=True, default='')
     subscriptions = models.ManyToManyField('MailingList', related_name='subscribers', blank=True)
@@ -20,16 +24,17 @@ class Subscriber(models.Model):
         except EmailSubscriber.DoesNotExist:
             pass
 
-    def __unicode__(self):
-        return self.cast().__unicode__()
+    def __str__(self):
+        return self.cast().__str__()
 
 
+@python_2_unicode_compatible
 class JaneusSubscriber(Subscriber):
     member_id = models.IntegerField(unique=True)
     janeus_name = models.CharField(max_length=255, blank=True, default='')
 
-    def __unicode__(self):
-        return r"Janeus subscriber '{}' ({})".format(self.janeus_name, str(self.member_id))
+    def __str__(self):
+        return "Janeus subscriber '{}' ({})".format(self.janeus_name, str(self.member_id))
 
     @transaction.atomic
     def update_janeus_newsletters(self):
@@ -83,11 +88,12 @@ class JaneusSubscriber(Subscriber):
         return allowed
 
 
+@python_2_unicode_compatible
 class EmailSubscriber(Subscriber):
     email = models.EmailField(max_length=254, unique=True)
 
-    def __unicode__(self):
-        return r"Email subscriber '{}'".format(self.email)
+    def __str__(self):
+        return "Email subscriber '{}'".format(self.email)
 
     @transaction.atomic
     def remove_secret_newsletters(self):
@@ -100,6 +106,7 @@ def create_expiration_date():
     return timezone.now() + timedelta(days=1)
 
 
+@python_2_unicode_compatible
 class EmailSubscriberAccessToken(models.Model):
     token = models.CharField(max_length=255)
     subscriber = models.OneToOneField(EmailSubscriber, related_name='token')
@@ -108,10 +115,11 @@ class EmailSubscriberAccessToken(models.Model):
     def get_absolute_url(self):
         return reverse('subscriptions_email', kwargs={'subscriber': self.pk, 'token': self.token})
 
-    def __unicode__(self):
-        return r"Access token for {}".format(str(self.subscriber))
+    def __str__(self):
+        return "Access token for {}".format(str(self.subscriber))
 
 
+@python_2_unicode_compatible
 class JaneusSubscriberAccessToken(models.Model):
     token = models.CharField(max_length=255)
     subscriber = models.OneToOneField(JaneusSubscriber, related_name='token')
@@ -120,15 +128,16 @@ class JaneusSubscriberAccessToken(models.Model):
     def get_absolute_url(self):
         return reverse('subscriptions_janeus', kwargs={'subscriber': self.pk, 'token': self.token})
 
-    def __unicode__(self):
-        return r"Access token for {}".format(str(self.subscriber))
+    def __str__(self):
+        return "Access token for {}".format(str(self.subscriber))
 
 
+@python_2_unicode_compatible
 class MailingList(models.Model):
     label = models.SlugField(unique=True)
     name = models.CharField(max_length=255)
     janeus_groups_auto = models.TextField(blank=True, default='')
     janeus_groups_required = models.TextField(blank=True, default='')
 
-    def __unicode__(self):
-        return r"{}".format(self.name)
+    def __str__(self):
+        return self.name

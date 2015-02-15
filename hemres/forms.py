@@ -1,3 +1,8 @@
+from __future__ import unicode_literals
+from future.builtins import super
+from future.builtins import str
+from future.builtins import int
+from builtins import object
 from django.forms import Form, EmailField, ModelForm, ModelMultipleChoiceField
 from django.forms.widgets import CheckboxSelectMultiple, CheckboxFieldRenderer, CheckboxChoiceInput
 from captcha.fields import ReCaptchaField
@@ -49,7 +54,7 @@ class JaneusSubscriberForm(ModelForm):
         required=False,
         label='Nieuwsbrieven')
 
-    class Meta:
+    class Meta(object):
         model = models.JaneusSubscriber
         fields = ('name', 'subscriptions')
 
@@ -73,7 +78,7 @@ class EmailSubscriberForm(ModelForm):
         widget=CheckboxSelectMultiple,
         label='Nieuwsbrieven')
 
-    class Meta:
+    class Meta(object):
         model = models.EmailSubscriber
         fields = ('name', 'subscriptions')
 
