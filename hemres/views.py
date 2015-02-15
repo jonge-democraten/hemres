@@ -145,7 +145,7 @@ def compose_mail(emailaddress, embed=True, request=None):
                'email_subscriber_tokens': email_subscribers_tokens,
                'emailimages': {},
                'emailimages_embed': embed,
-               'absolute_uri': request.build_absolute_uri(''),
+               'absolute_uri': request.build_absolute_uri('').strip('/'),
                'name': name}
-    result = render_to_string('hemres/email.html', context)
+    result = render_to_string('hemres/subscriptions_email.html', context)
     return result, [mime for mime, cid in context['emailimages'].itervalues()]
