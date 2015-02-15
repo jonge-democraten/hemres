@@ -5,47 +5,13 @@
     <meta charset="utf-8" />
     <title>{% block title %}Jonge Democraten Nieuwsbrieven{% endblock %}</title>
     <link rel="stylesheet" type="text/css" href="{% static 'hemres/css/template.css' %}">
-    <!-- <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>-->
-    <!-- <script src="{% static 'zues/js/jquery.steps.min.js' %}"></script>-->
-    <style>
-      .container { width: 670px; margin: 20px auto; }
-
-      #content h1 { font-weight: bold; font-size: 26px; line-height: 30px; letter-spacing: 1px; margin-top: 24px; margin-bottom: 4px; }
-      #content h3 { font-weight: bold; font-size: 16px; line-height: 18px; margin-bottom: 4px; }
-      #content h1 { color: #578439; } 
-      #content h3 { color: #888; } 
-
-      #content p, #content li { font: 14px/16px Arial,'Helvetica Neue',Helvetica,sans-serif;}
-
-      #content fieldset { margin: 5px 0; }
-      #content fieldset label { display: block; margin: 0; padding: 0; float: none; min-width: 120px; }
-      #content fieldset textarea { margin-bottom: 3px; width: 450px; }
-      #content fieldset button { margin-left: 0; }
-      #content fieldset button, .jdbutton
-                      { background: #578439 url('{% static 'hemres/images/TitleBackground.png' %}'); background-repeat: repeat-x;
-                        border-radius: 3px; border: 1px solid #303060;
-                        display: inline-block;
-                        text-shadow: 1px 1px 0px #000033; font-size: 14px; font-weight: bold;
-                        height: 30px; width: 120px;
-                        padding: 4px 16px;
-                        color: white; }
-
-      #content fieldset input[type='checkbox'] { width: 20px; }
-      #content fieldset ul { margin: 0; padding: 0; }
-      #content fieldset li { list-style-type: none; }
-
-      #content fieldset select { margin-bottom: 3px; min-width: 200px;}
-      #content fieldset .cell > input { min-width: 300px;}
-      #content fieldset p { margin-top: 0; padding-top: 0; }
-      #content fieldset .row { display: table-row; margin: 0; padding: 1em 0; }
-      #content fieldset .cell { display: table-cell; margin: 0; padding: 0; vertical-align: top; }
-      #content fieldset .errors { display: block; color: red; margin: 0; padding: 0; }
-
-    </style>
-{% block head %}{% endblock %}
+    <!--<script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>-->
+    <script type="text/javascript" src="{% static 'admin/js/jquery.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'admin/js/jquery.init.js' %}"></script>
+    {% block head %}{% endblock %}
   </head>
   <body>
-    <div class="container">
+    <div id="container">
       <div id="content">
       {% block logo %}<div style="display: block; margin-bottom: 8px;"><a href="{% url 'home' %}"><img src="{% static 'hemres/images/JongeDemocraten.png' %}" width="316" height="100px"  border="0" /></a></div>{% endblock %}
       {% block content %}{% endblock %}

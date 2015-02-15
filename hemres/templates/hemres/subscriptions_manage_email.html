@@ -1,30 +1,16 @@
 {% extends 'hemres/base.html' %}
 {% block content %}
-<h1>Nieuwsbrieven</h1>
-
-{{subscriber}}
-<form action="" method="post">{% csrf_token %}
-<fieldset>
-<div><p>Op deze pagina wijzig je de abonnementen gekoppeld aan &quot;{{ object.email }}&quot;</p></div>
-{{ form.non_field_errors }}
-{% for f in form.visible_fields %}
-<div class="row">
-<div class="cell">
-{{ f.label_tag }}
-</div>
-<div class="cell">
-{% if f.errors %}
-<span class="errors">{{ f.errors.as_text }}</span>
-{% endif %}
-{{ f }}
-</div>
-</div>
-{% endfor %}
-<div style="margin-top: 4px">
-<button class="button" type="submit">Opslaan</button>
-</div>
-</fieldset>
+<form action="" method="post">
+    <div class="formpart">
+        {% csrf_token %}
+        {% for hidden in create_form.hidden_fields %}{{ hidden }}{% endfor %}
+        <div class="title">Jonge Democraten Nieuwsbrieven</div>
+        <div class="text"><p>Op deze pagina wijzig je de abonnementen gekoppeld aan &quot;{{ object.email }}&quot;</p></div>
+        {{ form.non_field_errors }}
+        {% for f in form.visible_fields %}
+        <div class="question">{{ f.label_tag }}{{ f }}{% if f.errors %}<div class="errors">{{ f.errors.as_text }}</div>{% endif %}</div>
+        {% endfor %}
+        <div class="submit"><input class="button" type="submit" value="Opslaan" /></div>
+    </div>
 </form>
-</div>
-
-{% endblock %} 
+{% endblock %}

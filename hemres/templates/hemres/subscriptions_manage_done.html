@@ -1,7 +1,9 @@
 {% extends 'hemres/base.html' %}
 {% block content %}
-<h1>Nieuwsbrieven</h1>
-
-De abonnementen zijn ingesteld.
-
-{% endblock %} 
+<div class="formpart">
+    {% csrf_token %}
+    {% for hidden in create_form.hidden_fields %}{{ hidden }}{% endfor %}
+    <div class="title">Jonge Democraten Nieuwsbrieven</div>
+    <div class="text"><p>De nieuwsbrieven zijn ingesteld.</p></div>
+</div>
+{% endblock %}
