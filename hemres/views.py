@@ -33,7 +33,7 @@ def view_home(request):
     if request.method == 'POST':
         if form.is_valid():
             email = form.cleaned_data['email']
-            if getattr(settings, 'SKIP_EMAIL', False):
+            if getattr(settings, 'HEMRES_DONT_EMAIL', False):
                 email_to_send, attachments = compose_mail(email, False, request=request)
                 return HttpResponse(email_to_send, content_type='text/html')
             email_to_send, attachments = compose_mail(email, True, request=request)
