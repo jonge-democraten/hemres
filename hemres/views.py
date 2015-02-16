@@ -36,19 +36,9 @@ def view_home(request):
             if getattr(settings, 'HEMRES_DONT_EMAIL', False):
                 email_to_send, attachments = compose_mail(email, False, request=request)
                 return HttpResponse(email_to_send, content_type='text/html')
-            email_to_send, attachments = compose_mail(email, True, request=request)
-            subject = 'Jonge Democraten Nieuwsbrieven'
-            from_email = 'noreply@jongedemocraten.nl'
-            msg = EmailMultiAlternatives(subject=subject, body=email_to_send,
-                                         from_email=from_email, to=[email])
-            # msg.attach_alternative(email_to_send, "text/html")
-            msg.content_subtype = "html"
-            msg.mixed_subtype = 'related'
-            for a in attachments:
-                msg.attach(a)
-            msg.send()
-
-            return render(request, 'hemres/subscriptions_emailsent.html', {'email': email})
+            else:
+                send_mail(email, request=request)
+                return render(request, 'hemres/subscriptions_emailsent.html', {'email': email})
 
     return render(request, 'hemres/home.html', {'form': form})
 
@@ -118,6 +108,20 @@ def create_fresh_email_token(subscriber):
     t = models.EmailSubscriberAccessToken(subscriber=subscriber, token=token)
     t.save()
     return t
+
+
+def send_mail(emailaddress, request):
+    # knowledge of 'request' necessary to compose mail
+    email_to_send, attachments = compose_mail(emailaddress, True, request=request)
+    subject = 'Jonge Democraten Nieuwsbrieven'
+    from_email = 'noreply@jongedemocraten.nl'
+    msg = EmailMultiAlternatives(subject=subject, body=email_to_send, from_email=from_email, to=[emailaddress])
+    # msg.attach_alternative(email_to_send, "text/html")
+    msg.content_subtype = "html"
+    msg.mixed_subtype = 'related'
+    for a in attachments:
+        msg.attach(a)
+    msg.send()
 
 
 @transaction.atomic
