@@ -5,7 +5,6 @@ from future.builtins import int
 from builtins import object
 from django.forms import Form, EmailField, ModelForm, ModelMultipleChoiceField
 from django.forms.widgets import CheckboxSelectMultiple, CheckboxFieldRenderer, CheckboxChoiceInput
-from captcha.fields import ReCaptchaField
 
 from . import models
 
@@ -15,7 +14,10 @@ class SubscriptionEmailForm(Form):
 
 
 class SubscriptionEmailRecaptchaForm(SubscriptionEmailForm):
-    captcha = ReCaptchaField()
+    def __init__(self, *args, **kwargs):
+        super(SubscriptionEmailRecaptchaForm, self).__init__(*args, **kwargs)
+        from captcha.fields import ReCaptchaField
+        self.captcha = ReCaptchaField()
 
 
 class CheckboxChoiceInputDisabled(CheckboxChoiceInput):
