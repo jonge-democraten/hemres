@@ -143,11 +143,13 @@ def compose_mail(emailaddress, embed=True, request=None):
     else:
         name = None
 
+    absolute_uri = '%s://%s' % (request.scheme, request.get_host())
+
     context = {'janeus_subscriber_tokens': janeus_subscribers_tokens,
                'email_subscriber_tokens': email_subscribers_tokens,
                'emailimages': {},
                'emailimages_embed': embed,
-               'absolute_uri': request.build_absolute_uri('').strip('/'),
+               'absolute_uri': absolute_uri,
                'name': name}
     result = render_to_string('hemres/subscriptions_email.html', context)
     return result, [mime for mime, cid in list(context['emailimages'].values())]
