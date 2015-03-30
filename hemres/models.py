@@ -169,6 +169,15 @@ class NewsletterTemplate(models.Model):
     def __str__(self):
         return self.title
 
+    @transaction.atomic
+    def create_newsletter(self, subject):
+        a = Newsletter(template=self.template, subject=subject)
+        a.save()
+        for f in self.templateattachment_set.all():
+            at = NewsletterAttachment(newsletter=a, file=f.file, attach_to_email=f.attach_to_email, content_id=f.content_id)
+            at.save()
+        return a
+
 
 class TemplateAttachment(models.Model):
     template = models.ForeignKey(NewsletterTemplate)

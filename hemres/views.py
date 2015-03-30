@@ -1,11 +1,13 @@
 from __future__ import unicode_literals
 from future.builtins import int
 from django.conf import settings
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.contenttypes.models import ContentType
 from django.core.mail import EmailMultiAlternatives
 from django.core.urlresolvers import reverse
 from django.db import transaction
 from django.http import Http404, HttpResponse
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render, redirect
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.views.generic.edit import UpdateView
@@ -157,3 +159,11 @@ def compose_mail(emailaddress, embed, request):
                'name': name}
     result = render_to_string('hemres/subscriptions_email.html', context)
     return result, [mime for mime, cid in list(context['attachments'].values())]
+
+
+@staff_member_required
+def create_newsletter(request, template_pk):
+    template = get_object_or_404(models.NewsletterTemplate, pk=template_pk)
+    newsletter = template.create_newsletter('Untitled')
+    content_type = ContentType.objects.get_for_model(newsletter.__class__)
+    return redirect(reverse('admin:%s_%s_change' % (content_type.app_label, content_type.model), args=(newsletter.id,)))
