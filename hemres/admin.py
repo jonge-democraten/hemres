@@ -42,7 +42,7 @@ class NewsletterAdminForm(ModelForm):
 
 
 class NewsletterAdmin(admin.ModelAdmin):
-    list_display = ('__str__', 'date', 'view_mail')
+    list_display = ('__str__', 'date', 'view_mail', 'test_mail')
     inlines = [NewsletterAttachmentInline, ]
     form = NewsletterAdminForm
 
@@ -50,6 +50,11 @@ class NewsletterAdmin(admin.ModelAdmin):
         return '<a href="%s">View in browser</a>' % (reverse('view_newsletter', args=[obj.pk]),)
     view_mail.allow_tags = True
     view_mail.short_description = 'View in browser'
+
+    def test_mail(self, obj):
+        return '<a href="%s">Send test mail</a>' % (reverse('test_newsletter', args=[obj.pk]),)
+    test_mail.allow_tags = True
+    test_mail.short_description = 'Send test mail'
 
 
 admin.site.register(JaneusSubscriber)

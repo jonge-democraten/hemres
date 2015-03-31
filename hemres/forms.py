@@ -87,3 +87,7 @@ class EmailSubscriberForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(EmailSubscriberForm, self).__init__(*args, **kwargs)
         self.fields['name'].label = "Naam"
+
+
+class TestEmailForm(Form):
+    email = EmailField(max_length=254, label='Emailadres:')

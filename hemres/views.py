@@ -177,3 +177,34 @@ def view_newsletter(request, newsletter_pk):
     subscriptions_url = request.build_absolute_uri(reverse(view_home))
     email, attachments = newsletter.render('', False, subscriptions_url)
     return HttpResponse(email, content_type="text/html")
+
+
+@staff_member_required
+def test_newsletter(request, pk):
+    newsletter = get_object_or_404(models.Newsletter, pk=pk)
+    if request.method == 'POST':
+        form = forms.TestEmailForm(request.POST)
+    else:
+        form = forms.TestEmailForm()
+
+    if request.method == 'POST':
+        if form.is_valid():
+            address = form.cleaned_data['email']
+            subscriptions_url = request.build_absolute_uri(reverse(view_home))
+            email, attachments = newsletter.render('', True, subscriptions_url)
+
+            subject = newsletter.subject
+            from_email = getattr(settings, 'HEMRES_FROM_ADDRESS', 'noreply@jongedemocraten.nl')
+            msg = EmailMultiAlternatives(subject=subject, body=email, from_email=from_email, to=[address])
+            msg.content_subtype = "html"
+            msg.mixed_subtype = 'related'
+            for a in attachments:
+                msg.attach(a)
+            if getattr(settings, 'HEMRES_DONT_EMAIL', False):
+                return HttpResponse(msg.message().as_string(), content_type="message")
+            else:
+                msg.send()
+                content_type = ContentType.objects.get_for_model(newsletter.__class__)
+                return redirect(reverse('admin:%s_%s_changelist' % (content_type.app_label, content_type.model)))
+
+    return render(request, 'hemres/test_newsletter.html', {'form': form, 'nieuwsbrief': str(newsletter)})
