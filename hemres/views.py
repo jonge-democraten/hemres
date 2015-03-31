@@ -167,3 +167,13 @@ def create_newsletter(request, template_pk):
     newsletter = template.create_newsletter('Untitled')
     content_type = ContentType.objects.get_for_model(newsletter.__class__)
     return redirect(reverse('admin:%s_%s_change' % (content_type.app_label, content_type.model), args=(newsletter.id,)))
+
+
+def view_newsletter(request, newsletter_pk):
+    if request.user.is_active and request.user.is_staff:
+        newsletter = get_object_or_404(models.Newsletter, pk=newsletter_pk)
+    else:
+        newsletter = get_object_or_404(models.Newsletter.objects.filter(public=True), pk=newsletter_pk)
+    subscriptions_url = request.build_absolute_uri(reverse(view_home))
+    email, attachments = newsletter.render('', False, subscriptions_url)
+    return HttpResponse(email, content_type="text/html")

@@ -9,4 +9,5 @@ urlpatterns = patterns(
     url(r'^subscriptions/j/(?P<subscriber>\d+)/(?P<token>.+)/$', views.ManageJaneusSubscriptions.as_view(), name='subscriptions_janeus'),
     url(r'^subscriptions/done/$', views.subscriptions_done),
     url(r'^create_newsletter/(?P<template_pk>\d+)/$', views.create_newsletter, name='create_newsletter'),
+    url(r'^view/(?P<newsletter_pk>\d+)/$', views.view_newsletter, name='view_newsletter'),
 )
