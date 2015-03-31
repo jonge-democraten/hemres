@@ -151,9 +151,9 @@ def compose_mail(emailaddress, embed, request):
 
     context = {'janeus_subscriber_tokens': janeus_subscribers_tokens,
                'email_subscriber_tokens': email_subscribers_tokens,
-               'emailimages': {},
-               'emailimages_embed': embed,
+               'attachments': {},
+               'render_mail': embed,
                'absolute_uri': absolute_uri,
                'name': name}
     result = render_to_string('hemres/subscriptions_email.html', context)
-    return result, [mime for mime, cid in list(context['emailimages'].values())]
+    return result, [mime for mime, cid in list(context['attachments'].values())]
