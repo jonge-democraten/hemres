@@ -121,7 +121,7 @@ def create_fresh_email_token(subscriber):
 
 
 @transaction.atomic
-def compose_mail(emailaddress, embed=True, request=None):
+def compose_mail(emailaddress, embed, request):
     # find Janeus users
     if hasattr(settings, 'JANEUS_SERVER'):
         janeus_subscribers = [make_janeus_subscriber(s) for s in Janeus().lidnummers(emailaddress)]
