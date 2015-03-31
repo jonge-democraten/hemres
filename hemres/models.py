@@ -3,10 +3,16 @@ from future.builtins import str
 from datetime import timedelta
 from django.db import models, transaction
 from django.core.urlresolvers import reverse
+from django.template import Context, Template
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
+from django.utils.safestring import mark_safe
+from email import encoders
+from email.mime.base import MIMEBase
 from janeus import Janeus
 import re
+import bleach
+
 
 from .utils import HashFileField
 
@@ -197,6 +203,82 @@ class Newsletter(models.Model):
 
     def __str__(self):
         return self.subject
+
+    def render(self, name, embed, subscriptions_url):
+        # Render email, set embed=True for sending mail, or embed=False for viewing in browser
+
+        # Notes:
+        # absolute_uri = '%s://%s' % (request.scheme, request.get_host())
+        # subscriptions_url = request.build_absolute_uri(reverse('hemres.views.view_home'))
+
+        context = {}
+        context['render_mail'] = embed
+        context['subscriptions_url'] = subscriptions_url
+        context['attachments'] = {}  # receives MIME attachments
+
+        allowed_tags = ['a', 'b', 'code', 'em', 'h1', 'h2', 'h3', 'i', 'img', 'strong', 'ul', 'ol', 'li', 'p', 'br', 'span', 'table', 'tbody', 'tr', 'td', 'thead', 'div', 'span']
+        allowed_attrs = {
+            '*': ['class', 'style'],
+            'a': ['href', 'target'],
+            'img': ['src', 'alt'],
+        }
+
+        context['files'] = {}
+        attached = []
+        for f in self.newsletterattachment_set.all():
+            context['files'][f.content_id] = f
+            if f.attach_to_email:
+                attached.append(f.file)
+
+        if not embed and len(attached):
+            # we are for browser!
+            filelist_template = "<ul>{% for f in files %}<li><a href=\"{{f.file.url}}\">{{f.filename}}</a></li>{% endfor %}</ul>"
+            filelist = Template(filelist_template).render(Context({'files': attached}))
+            context['filelist'] = mark_safe(bleach.clean(filelist, tags=allowed_tags, attributes=allowed_attrs))
+        else:
+            context['filelist'] = ''
+
+        context['subject'] = mark_safe(bleach.clean(self.subject, tags=allowed_tags, attributes=allowed_attrs))
+        context['name'] = mark_safe(bleach.clean(name))
+
+        # first render content
+        # only allow tags "emailimage" and "emailfile"
+        # replace src="{{blabla}}" by src="{% emailimage 'blabla' %}"
+        # replace href="{{blabla}}" by href="{% emailfile 'blabla' %}"
+        # then use bleach to restrict HTML
+
+        # in the template, the following context variables are defined:
+        # - render_mail: Boolean, True if rendering for mail, False if for browser
+        # - subscriptions_url: URL for managing subscriptions
+        # - subject: subject as set in Newsletter object
+        # - name: name of the recipient (as set in EmailSubscriber or in LDAP)
+        # - content: content after rendering
+        # - filelist: unordered list of attached files (all files with attach_to_email set), only for in browser
+
+        header = "{% load hemres_email %}{% limit_filters %}{% limit_tags emailimage emailfile %}"
+        template = header + self.content
+        template = re.sub('src="\\{\\{\s*(\S+)\s*\\}\\}"', 'src="{% emailimage \'\\1\' %}"', template)
+        template = re.sub('href="\\{\\{\s*(\S+)\s*\\}\\}"', 'href="{% emailfile \'\\1\' %}"', template)
+        context['content'] = Template(template).render(Context(context))
+        context['content'] = mark_safe(bleach.clean(context['content'], tags=allowed_tags, attributes=allowed_attrs))
+
+        # then render whole mail
+        header = "{% load hemres_email %}{% limit_filters %}{% limit_tags emailimage emailfile if endif %}"
+        result = Template(header + self.template).render(Context(context))
+
+        # and add any unreferenced attachments
+        attachments = [mime for mime, cid in list(context['attachments'].values())]
+        for f in self.newsletterattachment_set.all():
+            if f.attach_to_email and f.content_id not in context['attachments']:
+                path = f.file.file.path
+                with open(path, 'rb') as fh:
+                    mime = MIMEBase('application', 'octet-stream')
+                    mime.set_payload(fh.read())
+                    encoders.encode_base64(mime)
+                    mime.add_header('Content-Disposition', 'attachment', filename=f.file.filename)
+                    attachments.append(mime)
+
+        return result, attachments
 
 
 class NewsletterAttachment(models.Model):
