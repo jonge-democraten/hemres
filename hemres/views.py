@@ -226,3 +226,11 @@ def prepare_sending(request, pk):
             return redirect(reverse('admin:%s_%s_changelist' % (content_type.app_label, content_type.model)))
 
     return render(request, 'hemres/prepare_sending.html', {'form': form, 'nieuwsbrief': str(newsletter)})
+
+
+@staff_member_required
+def process_sending(request, pk):
+    newsletter_to_list = get_object_or_404(models.NewsletterToList, pk=pk)
+    newsletter_to_list.process()
+    content_type = ContentType.objects.get_for_model(models.NewsletterToList)
+    return redirect(reverse('admin:%s_%s_changelist' % (content_type.app_label, content_type.model)))

@@ -63,11 +63,23 @@ class NewsletterAdmin(admin.ModelAdmin):
     prepare_sending.short_description = 'Send to list'
 
 
+class NewsletterToListAdmin(admin.ModelAdmin):
+    list_display = ('__str__', 'process_sending', 'date')
+
+    def process_sending(self, obj):
+        if obj.sent:
+            return 'Already sent'
+        else:
+            return '<a href="%s">Send to emails</a>' % (reverse('process_sending', args=[obj.pk]),)
+    process_sending.allow_tags = True
+    process_sending.short_description = 'Send to emails'
+
+
 admin.site.register(JaneusSubscriber)
 admin.site.register(EmailSubscriber)
 admin.site.register(MailingList)
 admin.site.register(NewsletterTemplate, NewsletterTemplateAdmin)
 admin.site.register(NewsletterFile, NewsletterFileAdmin)
 admin.site.register(Newsletter, NewsletterAdmin)
-admin.site.register(NewsletterToList)
+admin.site.register(NewsletterToList, NewsletterToListAdmin)
 admin.site.register(NewsletterToSubscriber)

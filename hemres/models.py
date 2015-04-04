@@ -308,6 +308,33 @@ class NewsletterToList(models.Model):
     def __str__(self):
         return "'{}' to '{}'".format(self.newsletter, self.target_list)
 
+    @transaction.atomic
+    def process(self):
+        if self.sent:
+            return  # only send once
+        for sub in self.target_list.subscribers.all():
+            sub = sub.cast()
+            if type(sub) is EmailSubscriber:
+                a = NewsletterToSubscriber(newsletter=self.newsletter,
+                                           subscriptions_url=self.subscriptions_url,
+                                           target_list=self.target_list,
+                                           target_name=sub.name,
+                                           target_email=sub.email)
+                a.save()
+            elif type(sub) is JaneusSubscriber:
+                res = Janeus().attributes(sub.member_id)
+                if res is not None:
+                    mail, name = res
+                    a = NewsletterToSubscriber(newsletter=self.newsletter,
+                                               subscriptions_url=self.subscriptions_url,
+                                               target_list=self.target_list,
+                                               target_name=name,
+                                               target_email=mail)
+                    a.save()
+        self.sent = True
+        self.date = timezone.now()
+        self.save()
+
 
 @python_2_unicode_compatible
 class NewsletterToSubscriber(models.Model):
