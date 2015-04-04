@@ -2,6 +2,8 @@ from __future__ import unicode_literals
 from future.builtins import str
 from datetime import timedelta
 from django.db import models, transaction
+from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
 from django.core.urlresolvers import reverse
 from django.template import Context, Template
 from django.utils import timezone
@@ -312,9 +314,28 @@ class NewsletterToList(models.Model):
     def process(self):
         if self.sent:
             return  # only send once
+
+        # get auto and required Janeus groups
+        auto = set([x.strip() for x in re.split(',|\n', self.target_list.janeus_groups_auto) if len(x.strip())])
+        req = set([x.strip() for x in re.split(',|\n', self.target_list.janeus_groups_required) if len(x.strip())])
+
+        # First send it to all automatic subscribers
+        autosubs = {}
+        for group in auto:
+            for dn, attrs in Janeus().members_of_group(group):
+                autosubs[attrs['cn'][0]] = (attrs['sn'][0], attrs['mail'][0])
+        for sub in autosubs.values():
+            a = NewsletterToSubscriber(newsletter=self.newsletter,
+                                       subscriptions_url=self.subscriptions_url,
+                                       target_list=self.target_list,
+                                       target_name=sub[0],
+                                       target_email=sub[1])
+            a.save()
+
+        # Then send to all subscribers from database
         for sub in self.target_list.subscribers.all():
             sub = sub.cast()
-            if type(sub) is EmailSubscriber:
+            if type(sub) is EmailSubscriber and not len(req):
                 a = NewsletterToSubscriber(newsletter=self.newsletter,
                                            subscriptions_url=self.subscriptions_url,
                                            target_list=self.target_list,
@@ -322,15 +343,23 @@ class NewsletterToList(models.Model):
                                            target_email=sub.email)
                 a.save()
             elif type(sub) is JaneusSubscriber:
-                res = Janeus().attributes(sub.member_id)
+                res = Janeus().by_lidnummer(sub.member_id)
                 if res is not None:
-                    mail, name = res
-                    a = NewsletterToSubscriber(newsletter=self.newsletter,
-                                               subscriptions_url=self.subscriptions_url,
-                                               target_list=self.target_list,
-                                               target_name=name,
-                                               target_email=mail)
-                    a.save()
+                    dn, attrs = res
+                    mail, name = attrs['mail'][0], attrs['sn'][0]
+                    send_it = True
+                    if str(sub.member_id) in autosubs:
+                        send_it = False  # already sent
+                    if len(req):
+                        groups = set(Janeus().groups_of_dn(dn))
+                        send_it = len(req.intersection(groups)) > 0
+                    if send_it:
+                        a = NewsletterToSubscriber(newsletter=self.newsletter,
+                                                   subscriptions_url=self.subscriptions_url,
+                                                   target_list=self.target_list,
+                                                   target_name=name,
+                                                   target_email=mail)
+                        a.save()
         self.sent = True
         self.date = timezone.now()
         self.save()
@@ -347,3 +376,16 @@ class NewsletterToSubscriber(models.Model):
 
     def __str__(self):
         return "'[{}] {}' to '{}'".format(self.target_list, self.newsletter, self.target_email)
+
+    def send_mail(self):
+        subject = "[{}] {}".format(self.target_list.name, self.newsletter.subject)
+        email, attachments = self.newsletter.render(self.target_name, True, self.subscriptions_url)
+        from_email = getattr(settings, 'HEMRES_FROM_ADDRESS', 'noreply@jongedemocraten.nl')
+        msg = EmailMultiAlternatives(subject=subject, body=email, from_email=from_email, to=[self.target_email])
+        msg.content_subtype = "html"
+        msg.mixed_subtype = 'related'
+        for a in attachments:
+            msg.attach(a)
+        if not getattr(settings, 'HEMRES_DONT_EMAIL', False):
+            msg.send()
+        self.delete()

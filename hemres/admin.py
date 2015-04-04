@@ -75,6 +75,16 @@ class NewsletterToListAdmin(admin.ModelAdmin):
     process_sending.short_description = 'Send to emails'
 
 
+def send_newsletters(modeladmin, request, queryset):
+    for n in queryset:
+        n.send_mail()
+send_newsletters.short_description = "Send the newsletters"
+
+
+class NewsletterToSubscribersAdmin(admin.ModelAdmin):
+    actions = [send_newsletters]
+
+
 admin.site.register(JaneusSubscriber)
 admin.site.register(EmailSubscriber)
 admin.site.register(MailingList)
@@ -82,4 +92,4 @@ admin.site.register(NewsletterTemplate, NewsletterTemplateAdmin)
 admin.site.register(NewsletterFile, NewsletterFileAdmin)
 admin.site.register(Newsletter, NewsletterAdmin)
 admin.site.register(NewsletterToList, NewsletterToListAdmin)
-admin.site.register(NewsletterToSubscriber)
+admin.site.register(NewsletterToSubscriber, NewsletterToSubscribersAdmin)
