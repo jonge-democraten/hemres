@@ -280,9 +280,43 @@ class Newsletter(models.Model):
 
         return result, attachments
 
+    @transaction.atomic
+    def prepare_sending(self, target_list):
+        a = NewsletterToList(newsletter=self, target_list=target_list)
+        a.save()
+        return a
+
 
 class NewsletterAttachment(models.Model):
     newsletter = models.ForeignKey(Newsletter)
     file = models.ForeignKey(NewsletterFile)
     attach_to_email = models.BooleanField(default=True)
     content_id = models.CharField(max_length=255)
+
+
+@python_2_unicode_compatible
+class NewsletterToList(models.Model):
+    # To send newsletter to mailing list. After sending, the field
+    # sent will be set to True and the date to the moment that the
+    # NewsletterToSubscriber instances were created.
+    newsletter = models.ForeignKey(Newsletter, null=False)
+    target_list = models.ForeignKey(MailingList, null=False)
+    subscriptions_url = models.CharField(max_length=255, blank=True)
+    sent = models.BooleanField(default=False)
+    date = models.DateTimeField(auto_now_add=True, blank=True)
+
+    def __str__(self):
+        return "'{}' to '{}'".format(self.newsletter, self.target_list)
+
+
+@python_2_unicode_compatible
+class NewsletterToSubscriber(models.Model):
+    # After sending, instance is deleted.
+    newsletter = models.ForeignKey(Newsletter, null=False)
+    subscriptions_url = models.CharField(max_length=255, blank=True)
+    target_list = models.ForeignKey(MailingList, null=False)
+    target_name = models.CharField(max_length=255, blank=True)
+    target_email = models.EmailField(max_length=254)
+
+    def __str__(self):
+        return "'[{}] {}' to '{}'".format(self.target_list, self.newsletter, self.target_email)

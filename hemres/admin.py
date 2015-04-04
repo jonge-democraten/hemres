@@ -3,6 +3,7 @@ from django.contrib import admin
 from django.core.urlresolvers import reverse
 from django.forms import ModelForm
 from .models import JaneusSubscriber, EmailSubscriber, MailingList, Newsletter, NewsletterFile, NewsletterTemplate
+from .models import NewsletterToList, NewsletterToSubscriber
 
 
 class TemplateAttachmentInline(admin.TabularInline):
@@ -63,3 +64,5 @@ admin.site.register(MailingList)
 admin.site.register(NewsletterTemplate, NewsletterTemplateAdmin)
 admin.site.register(NewsletterFile, NewsletterFileAdmin)
 admin.site.register(Newsletter, NewsletterAdmin)
+admin.site.register(NewsletterToList)
+admin.site.register(NewsletterToSubscriber)
