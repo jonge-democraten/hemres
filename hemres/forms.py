@@ -3,8 +3,8 @@ from future.builtins import super
 from future.builtins import str
 from future.builtins import int
 from builtins import object
-from django.forms import Form, EmailField, ModelForm, ModelMultipleChoiceField
-from django.forms.widgets import CheckboxSelectMultiple, CheckboxFieldRenderer, CheckboxChoiceInput
+from django.forms import Form, EmailField, ModelForm, ModelMultipleChoiceField, ModelChoiceField
+from django.forms.widgets import CheckboxSelectMultiple, CheckboxFieldRenderer, CheckboxChoiceInput, RadioSelect
 
 from . import models
 
@@ -91,3 +91,12 @@ class EmailSubscriberForm(ModelForm):
 
 class TestEmailForm(Form):
     email = EmailField(max_length=254, label='Emailadres:')
+
+
+class PrepareSendingForm(Form):
+    lists = ModelChoiceField(
+        queryset=models.MailingList.objects.filter().order_by('name'),
+        required=True,
+        widget=RadioSelect,
+        empty_label=None,
+        label='Nieuwsbrieven')

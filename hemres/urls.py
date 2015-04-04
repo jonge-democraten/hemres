@@ -11,4 +11,5 @@ urlpatterns = patterns(
     url(r'^create_newsletter/(?P<template_pk>\d+)/$', views.create_newsletter, name='create_newsletter'),
     url(r'^view/(?P<newsletter_pk>\d+)/$', views.view_newsletter, name='view_newsletter'),
     url(r'^test/(?P<pk>\d+)$', views.test_newsletter, name='test_newsletter'),
+    url(r'^prepare/(?P<pk>\d+)$', views.prepare_sending, name='prepare_sending'),
 )

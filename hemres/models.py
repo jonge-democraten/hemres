@@ -281,8 +281,8 @@ class Newsletter(models.Model):
         return result, attachments
 
     @transaction.atomic
-    def prepare_sending(self, target_list):
-        a = NewsletterToList(newsletter=self, target_list=target_list)
+    def prepare_sending(self, target_list, subscriptions_url):
+        a = NewsletterToList(newsletter=self, target_list=target_list, subscriptions_url=subscriptions_url)
         a.save()
         return a
 

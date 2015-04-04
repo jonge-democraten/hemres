@@ -208,3 +208,21 @@ def test_newsletter(request, pk):
                 return redirect(reverse('admin:%s_%s_changelist' % (content_type.app_label, content_type.model)))
 
     return render(request, 'hemres/test_newsletter.html', {'form': form, 'nieuwsbrief': str(newsletter)})
+
+
+@staff_member_required
+def prepare_sending(request, pk):
+    newsletter = get_object_or_404(models.Newsletter, pk=pk)
+    if request.method == 'POST':
+        form = forms.PrepareSendingForm(request.POST)
+    else:
+        form = forms.PrepareSendingForm()
+
+    if request.method == 'POST':
+        if form.is_valid():
+            subscriptions_url = request.build_absolute_uri(reverse(view_home))
+            newsletter.prepare_sending(form.cleaned_data['lists'], subscriptions_url)
+            content_type = ContentType.objects.get_for_model(newsletter.__class__)
+            return redirect(reverse('admin:%s_%s_changelist' % (content_type.app_label, content_type.model)))
+
+    return render(request, 'hemres/prepare_sending.html', {'form': form, 'nieuwsbrief': str(newsletter)})
