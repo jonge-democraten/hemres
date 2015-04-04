@@ -114,7 +114,7 @@ def send_mail(emailaddress, request):
     # knowledge of 'request' necessary to compose mail
     email_to_send, attachments = compose_mail(emailaddress, True, request=request)
     subject = 'Jonge Democraten Nieuwsbrieven'
-    from_email = 'noreply@jongedemocraten.nl'
+    from_email = getattr(settings, 'HEMRES_FROM_ADDRESS', 'noreply@jongedemocraten.nl')
     msg = EmailMultiAlternatives(subject=subject, body=email_to_send, from_email=from_email, to=[emailaddress])
     # msg.attach_alternative(email_to_send, "text/html")
     msg.content_subtype = "html"
