@@ -11,13 +11,7 @@ class TemplateAttachmentInline(admin.TabularInline):
 
 
 class NewsletterTemplateAdmin(admin.ModelAdmin):
-    list_display = ('__str__', 'create_newsletter',)
     inlines = [TemplateAttachmentInline, ]
-
-    def create_newsletter(self, obj):
-        return '<a href="%s">Create newsletter</a>' % (reverse('create_newsletter', args=[obj.pk]),)
-    create_newsletter.allow_tags = True
-    create_newsletter.short_description = 'Create newsletter'
 
 
 class NewsletterFileAdmin(admin.ModelAdmin):
