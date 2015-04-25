@@ -82,6 +82,7 @@ class ManageJaneusSubscriptions(UpdateView):
         # check expire
         if len(accesstoken) == 0:
             raise Http404()
+        accesstoken[0].subscriber.update_janeus_newsletters()
         return accesstoken[0].subscriber
 
 
