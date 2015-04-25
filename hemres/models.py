@@ -19,6 +19,10 @@ import bleach
 from .utils import HashFileField
 
 
+# bleach is annoying with CSS handling. Just break it.
+bleach.BleachSanitizer.sanitize_css = lambda self, style: style
+
+
 @python_2_unicode_compatible
 class Subscriber(models.Model):
     name = models.CharField(max_length=255, blank=True, default='')
@@ -218,11 +222,12 @@ class Newsletter(models.Model):
         context['subscriptions_url'] = subscriptions_url
         context['attachments'] = {}  # receives MIME attachments
 
-        allowed_tags = ['a', 'b', 'code', 'em', 'h1', 'h2', 'h3', 'i', 'img', 'strong', 'ul', 'ol', 'li', 'p', 'br', 'span', 'table', 'tbody', 'tr', 'td', 'thead', 'div', 'span']
+        allowed_tags = ['a', 'b', 'blockquote', 'caption', 'code', 'em', 'h1', 'h2', 'h3', 'i', 'img', 'strong', 'ul', 'ol', 'li', 'p', 'br', 'span', 'table', 'tbody', 'tr', 'td', 'thead', 'div', 'span']
         allowed_attrs = {
             '*': ['class', 'style'],
             'a': ['href', 'target'],
-            'img': ['src', 'alt'],
+            'img': ['src', 'alt', 'width', 'height'],
+            'table': ['border', 'align', 'cellpadding', 'cellspacing'],
         }
 
         context['files'] = {}
