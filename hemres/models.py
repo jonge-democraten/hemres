@@ -247,6 +247,7 @@ class Newsletter(models.Model):
 
         context['subject'] = mark_safe(bleach.clean(self.subject, tags=allowed_tags, attributes=allowed_attrs))
         context['name'] = mark_safe(bleach.clean(name))
+        context['naam'] = mark_safe(bleach.clean(name))
 
         # first render content
         # only allow tags "emailimage" and "emailfile"
