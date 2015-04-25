@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 from django.contrib import admin
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, reverse_lazy
 from django.forms import ModelForm
 from .models import JaneusSubscriber, EmailSubscriber, MailingList, Newsletter, NewsletterFile, NewsletterTemplate
 from .models import NewsletterToList, NewsletterToSubscriber
@@ -61,6 +61,13 @@ class NewsletterAdmin(admin.ModelAdmin):
         return '<a href="%s">Send to list</a>' % (reverse('prepare_sending', args=[obj.pk]),)
     prepare_sending.allow_tags = True
     prepare_sending.short_description = 'Send to list'
+
+    def get_urls(self):
+        from django.conf.urls import url
+        from django.views.generic import RedirectView
+        info = self.model._meta.app_label, self.model._meta.model_name
+        urlpatterns = [url(r'^create_newsletter$', RedirectView.as_view(url=reverse_lazy('create_newsletter')), name='%s_%s_add' % info)]
+        return super(NewsletterAdmin, self).get_urls() + urlpatterns
 
 
 class NewsletterToListAdmin(admin.ModelAdmin):
