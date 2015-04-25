@@ -47,6 +47,12 @@ class NewsletterAdmin(admin.ModelAdmin):
     inlines = [NewsletterAttachmentInline, ]
     form = NewsletterAdminForm
 
+    def get_fields(self, request, obj=None):
+        fields = super(NewsletterAdmin, self).get_fields(request, obj=obj)
+        if not request.user.has_perm('hemres.change_newslettertemplate'):
+            fields.remove('template')
+        return fields
+
     def view_mail(self, obj):
         return '<a href="%s">View in browser</a>' % (reverse('view_newsletter', args=[obj.pk]),)
     view_mail.allow_tags = True
