@@ -1,0 +1,17 @@
+{% extends 'hemres/base.html' %}
+{% block content %}
+
+<form action="" method="post">
+    <div class="formpart">
+        {% csrf_token %}
+        {% for hidden in create_form.hidden_fields %}{{ hidden }}{% endfor %}
+        <div class="title">Nieuwsbrief aanmaken</div>
+        {{ form.non_field_errors }}
+        {% for f in form.visible_fields %}
+        <div class="question">{{ f.label_tag }}{{ f }}{% if f.errors %}<div class="errors">{{ f.errors.as_text }}</div>{% endif %}</div>
+        {% endfor %}
+        <div class="submit"><input class="button" type="submit" value="Aanmaken" /></div>
+    </div>
+</form>
+
+{% endblock %} 

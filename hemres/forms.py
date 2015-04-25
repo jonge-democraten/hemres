@@ -89,6 +89,15 @@ class EmailSubscriberForm(ModelForm):
         self.fields['name'].label = "Naam"
 
 
+class CreateNewsletterForm(Form):
+    template = ModelChoiceField(
+        queryset=models.NewsletterTemplate.objects.filter().order_by('title'),
+        required=True,
+        widget=RadioSelect,
+        empty_label=None,
+        label='Templates')
+
+
 class TestEmailForm(Form):
     email = EmailField(max_length=254, label='Emailadres:')
 
