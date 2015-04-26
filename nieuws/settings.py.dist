@@ -36,6 +36,9 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'hemres',
+    'janeus',
+    'django_rq',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -74,4 +77,28 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
 
+# STATIC_ROOT = ''
 STATIC_URL = '/static/'
+# MEDIA_ROOT = ''
+# MEDIA_URL = ''
+
+SKIP_EMAIL = True
+EMAIL_HOST = 'localhost'
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
+EMAIL_PORT = 587
+
+# JANEUS_SERVER="ldap://127.0.0.1:389/"
+# JANEUS_DN="cn=readuser,ou=sysUsers,dc=jd,dc=nl"
+# JANEUS_PASS=""
+# AUTHENTICATION_BACKENDS = ('janeus.backend.JaneusBackend', 'django.contrib.auth.backends.ModelBackend',)
+
+RQ_QUEUES = {
+    'default': {
+        'HOST': 'localhost',
+        'PORT': 6379,
+        'DB': 0,
+        'PASSWORD': '',
+        'DEFAULT_TIMEOUT': 360,
+    },
+}
