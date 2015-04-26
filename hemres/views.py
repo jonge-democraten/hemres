@@ -13,6 +13,7 @@ from django.utils import timezone
 from django.views.generic.edit import UpdateView
 import hashlib
 import os
+import html2text
 
 from janeus import Janeus
 
@@ -201,15 +202,20 @@ def test_newsletter(request, pk):
         if form.is_valid():
             address = form.cleaned_data['email']
             subscriptions_url = request.build_absolute_uri(reverse(view_home))
-            email, attachments = newsletter.render('', True, subscriptions_url)
+            subject = "[Test] {}".format(newsletter.subject)
+            html_content, attachments = newsletter.render('', True, subscriptions_url)
 
-            subject = newsletter.subject
+            h = html2text.HTML2Text()
+            h.ignore_images = True
+            text_content = h.handle(html_content)
             from_email = getattr(settings, 'HEMRES_FROM_ADDRESS', 'noreply@jongedemocraten.nl')
-            msg = EmailMultiAlternatives(subject=subject, body=email, from_email=from_email, to=[address])
-            msg.content_subtype = "html"
+
+            msg = EmailMultiAlternatives(subject=subject, body=text_content, from_email=from_email, to=[address])
+            msg.attach_alternative(html_content, "text/html")
             msg.mixed_subtype = 'related'
             for a in attachments:
                 msg.attach(a)
+
             if getattr(settings, 'HEMRES_DONT_EMAIL', False):
                 return HttpResponse(msg.message().as_string(), content_type="message")
             else:
