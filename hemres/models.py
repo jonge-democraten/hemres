@@ -14,6 +14,7 @@ from email.mime.base import MIMEBase
 from janeus import Janeus
 import re
 import bleach
+import html2text
 
 
 from .utils import HashFileField
@@ -387,13 +388,18 @@ class NewsletterToSubscriber(models.Model):
 
     def send_mail(self):
         subject = "[{}] {}".format(self.target_list.name, self.newsletter.subject)
-        email, attachments = self.newsletter.render(self.target_name, True, self.subscriptions_url)
+        html_content, attachments = self.newsletter.render(self.target_name, True, self.subscriptions_url)
+        h = html2text.HTML2Text()
+        h.ignore_images = True
+        text_content = h.handle(html_content)
         from_email = getattr(settings, 'HEMRES_FROM_ADDRESS', 'noreply@jongedemocraten.nl')
-        msg = EmailMultiAlternatives(subject=subject, body=email, from_email=from_email, to=[self.target_email])
-        msg.content_subtype = "html"
+
+        msg = EmailMultiAlternatives(subject=subject, body=text_content, from_email=from_email, to=[self.target_email])
+        msg.attach_alternative(html_content, "text/html")
         msg.mixed_subtype = 'related'
         for a in attachments:
             msg.attach(a)
+
         if not getattr(settings, 'HEMRES_DONT_EMAIL', False):
             msg.send()
         self.delete()
