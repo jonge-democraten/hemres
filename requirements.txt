@@ -10,3 +10,4 @@ six==1.9.0
 -e git+https://github.com/jonge-democraten/janeus@1.2#egg=janeus
 html2text==2015.4.14
 future==0.14.3
+gunicorn==19.3.0
