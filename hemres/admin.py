@@ -32,8 +32,7 @@ class NewsletterAdminForm(ModelForm):
             self.fields['content'].widget = TinyMceWidget()
             self.fields['content'].widget.attrs['data-mce-conf'] = "{\"convert_urls\": false, \"relative_urls\": false, \"theme\": \"advanced\"}"
         except ImportError:
-            from tinymce.widgets import TinyMCE
-            self.fields['content'].widget = TinyMCE(attrs={'cols': 80, 'rows': 30}, mce_attrs={'theme': 'advanced', 'convert_urls': False, 'relative_urls': False})
+            pass
 
 
 class NewsletterAdmin(admin.ModelAdmin):
