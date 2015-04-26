@@ -248,5 +248,20 @@ def prepare_sending(request, pk):
 def process_sending(request, pk):
     newsletter_to_list = get_object_or_404(models.NewsletterToList, pk=pk)
     newsletter_to_list.process()
+    send_tasks()
     content_type = ContentType.objects.get_for_model(models.NewsletterToList)
     return redirect(reverse('admin:%s_%s_changelist' % (content_type.app_label, content_type.model)))
+
+
+def send_mail(pk):
+    try:
+        ns = models.NewsletterToSubscriber.objects.get(pk=pk)
+        ns.send_mail()
+    except:
+        pass
+
+
+def send_tasks():
+    import django_rq
+    for ns in models.NewsletterToSubscriber.objects.all():
+        django_rq.enqueue(send_mail, ns.pk, timeout=10)
