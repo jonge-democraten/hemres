@@ -1,18 +1,31 @@
-{% extends 'hemres/base.html' %}
-{% block content %}
+{% extends 'admin/base_site.html' %}
+{% load admin_urls admin_modify admin_static static %}
 
-<form action="" method="post">
-    <div class="formpart">
-        {% csrf_token %}
-        {% for hidden in create_form.hidden_fields %}{{ hidden }}{% endfor %}
-        <div class="title">Testmail versturen</div>
-        <div class="text"><p>Vul hieronder je emailadres in om een testmail te krijgen voor de nieuwsbrief '{{ nieuwsbrief }}'</p></div>
-        {{ form.non_field_errors }}
-        {% for f in form.visible_fields %}
-        <div class="question">{{ f.label_tag }}{{ f }}{% if f.errors %}<div class="errors">{{ f.errors.as_text }}</div>{% endif %}</div>
-        {% endfor %}
-        <div class="submit"><input class="button" type="submit" value="Versturen!" /></div>
-    </div>
+{% block extrastyle %}{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}" />
+<link rel="stylesheet" type="text/css" href="{% static "grappelli/css/base.css" %}" />
+{% endblock %}
+
+{% block content %}
+<h1>Testmail versturen</h1>
+<form enctype="multipart/form-data" action="" method="post">
+{% csrf_token %}
+{% for hidden in create_form.hidden_fields %}{{ hidden }}{% endfor %}
+<fieldset class="module aligned">
+<div class="form-row"><p>Vul hieronder je emailadres in om een testmail te krijgen voor de nieuwsbrief '{{ nieuwsbrief }}'</p></div>
+{{ form.non_field_errors }}
+{% for f in form.visible_fields %}
+        <div class="form-row">{{ f.label_tag }}{{ f }}{% if f.errors %}<div class="errors">{{ f.errors.as_text }}</div>{% endif %}</div>
+{% endfor %}
+</fieldset>
+<div class="submit-row"><input class="default" type="submit" value="Versturen" /></div>
 </form>
 
-{% endblock %} 
+<script type="text/javascript">
+<!-- fix -->
+jQuery(function($) {
+    $(".form-row > label").addClass("required");
+    $("#id_template").addClass('radiolist');
+});
+</script>
+{% endblock %}
