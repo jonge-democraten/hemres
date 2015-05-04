@@ -70,7 +70,7 @@ class NewsletterAdmin(admin.ModelAdmin):
 
 
 class NewsletterToListAdmin(admin.ModelAdmin):
-    list_display = ('__str__', 'process_sending', 'date')
+    list_display = ('__str__', 'view_mail', 'test_mail', 'process_sending', 'date')
 
     def process_sending(self, obj):
         if obj.sent:
@@ -79,6 +79,16 @@ class NewsletterToListAdmin(admin.ModelAdmin):
             return '<a href="%s">Send to emails</a>' % (reverse('process_sending', args=[obj.pk]),)
     process_sending.allow_tags = True
     process_sending.short_description = 'Send to emails'
+
+    def view_mail(self, obj):
+        return '<a href="%s">View in browser</a>' % (reverse('view_newsletter', args=[obj.newsletter.pk]),)
+    view_mail.allow_tags = True
+    view_mail.short_description = 'View in browser'
+
+    def test_mail(self, obj):
+        return '<a href="%s">Send test mail</a>' % (reverse('test_newsletter', args=[obj.newsletter.pk]),)
+    test_mail.allow_tags = True
+    test_mail.short_description = 'Send test mail'
 
 
 def send_newsletters(modeladmin, request, queryset):
