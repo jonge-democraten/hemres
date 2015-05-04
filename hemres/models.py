@@ -264,7 +264,7 @@ class Newsletter(models.Model):
         # - content: content after rendering
         # - filelist: unordered list of attached files (all files with attach_to_email set), only for in browser
 
-        header = "{% load hemres_email %}{% limit_filters %}{% limit_tags emailimage emailfile %}"
+        header = "{% load hemres_email %}{% limit_filters %}{% limit_tags emailimage_media emailimage_static emailimage emailfile %}"
         template = header + self.content
         template = re.sub('src="\\{\\{\s*(\S+)\s*\\}\\}"', 'src="{% emailimage \'\\1\' %}"', template)
         template = re.sub('href="\\{\\{\s*(\S+)\s*\\}\\}"', 'href="{% emailfile \'\\1\' %}"', template)
@@ -274,7 +274,7 @@ class Newsletter(models.Model):
         context['content'] = mark_safe(bleach.clean(context['content'], tags=allowed_tags, attributes=allowed_attrs))
 
         # then render whole mail
-        header = "{% load hemres_email %}{% limit_filters %}{% limit_tags emailimage emailfile if endif %}"
+        header = "{% load hemres_email %}{% limit_filters %}{% limit_tags emailimage_media emailimage_static emailimage emailfile if endif %}"
         result = Template(header + self.template).render(Context(context))
 
         # and add any unreferenced attachments
