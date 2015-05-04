@@ -262,6 +262,10 @@ def send_mail(pk):
 
 
 def send_tasks():
-    import django_rq
-    for ns in models.NewsletterToSubscriber.objects.all():
-        django_rq.enqueue(send_mail, ns.pk, timeout=10)
+    # This fails (silently) if django_rq is not available.
+    try:
+        import django_rq
+        for ns in models.NewsletterToSubscriber.objects.all():
+            django_rq.enqueue(send_mail, ns.pk, timeout=10)
+    except:
+        pass
