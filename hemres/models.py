@@ -53,6 +53,8 @@ class JaneusSubscriber(Subscriber):
 
     @transaction.atomic
     def update_janeus_newsletters(self):
+        if not hasattr(settings, 'JANEUS_SERVER'):
+            return
         res = Janeus().by_lidnummer(self.member_id)
         if res is None:
             self.groups = []  # whoops...
@@ -72,6 +74,8 @@ class JaneusSubscriber(Subscriber):
         self.save()
 
     def get_auto_newsletters(self):
+        if not hasattr(settings, 'JANEUS_SERVER'):
+            return []
         res = Janeus().by_lidnummer(self.member_id)
         if res is None:
             self.groups = []  # whoops...
@@ -85,6 +89,8 @@ class JaneusSubscriber(Subscriber):
         return auto_membership
 
     def get_allowed_newsletters(self):
+        if not hasattr(settings, 'JANEUS_SERVER'):
+            return MailingList.objects.all()
         res = Janeus().by_lidnummer(self.member_id)
         if res is None:
             self.groups = []  # whoops...
@@ -331,8 +337,9 @@ class NewsletterToList(models.Model):
         # First send it to all automatic subscribers
         autosubs = {}
         for group in auto:
-            for dn, attrs in Janeus().members_of_group(group):
-                autosubs[attrs['cn'][0]] = (attrs['sn'][0], attrs['mail'][0])
+            if hasattr(settings, 'JANEUS_SERVER'):
+                for dn, attrs in Janeus().members_of_group(group):
+                    autosubs[attrs['cn'][0]] = (attrs['sn'][0], attrs['mail'][0])
         for sub in autosubs.values():
             a = NewsletterToSubscriber(newsletter=self.newsletter,
                                        subscriptions_url=self.subscriptions_url,
@@ -352,7 +359,10 @@ class NewsletterToList(models.Model):
                                            target_email=sub.email)
                 a.save()
             elif type(sub) is JaneusSubscriber:
-                res = Janeus().by_lidnummer(sub.member_id)
+                if hasattr(settings, 'JANEUS_SERVER'):
+                    res = Janeus().by_lidnummer(sub.member_id)
+                else:
+                    res = None
                 if res is not None:
                     dn, attrs = res
                     mail, name = attrs['mail'][0], attrs['sn'][0]
