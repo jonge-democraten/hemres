@@ -186,7 +186,7 @@ def view_newsletter(request, newsletter_pk):
     else:
         newsletter = get_object_or_404(models.Newsletter.objects.filter(public=True), pk=newsletter_pk)
     subscriptions_url = request.build_absolute_uri(reverse(view_home))
-    email, attachments = newsletter.render('', False, subscriptions_url)
+    email, attachments = newsletter.render('Naam', False, subscriptions_url)
     return HttpResponse(email, content_type="text/html")
 
 
