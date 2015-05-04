@@ -9,5 +9,6 @@ setup(
     author_email='ict@jongedemocraten.nl',
     description='Webapp for sending newsletters',
     include_package_data=True,
+    install_requires=['html2text>=2015.4.14','bleach>=1.4.1'],
     license='MIT',
 )
