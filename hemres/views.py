@@ -40,7 +40,7 @@ def view_home(request):
                 email_to_send, attachments = compose_mail(email, False, request=request)
                 return HttpResponse(email_to_send, content_type='text/html')
             else:
-                send_mail(email, request=request)
+                send_subscriber_mail(email, request=request)
                 return render(request, 'hemres/subscriptions_emailsent.html', {'email': email})
 
     return render(request, 'hemres/home.html', {'form': form})
@@ -114,7 +114,7 @@ def create_fresh_email_token(subscriber):
     return t
 
 
-def send_mail(emailaddress, request):
+def send_subscriber_mail(emailaddress, request):
     # knowledge of 'request' necessary to compose mail
     email_to_send, attachments = compose_mail(emailaddress, True, request=request)
     subject = 'Jonge Democraten Nieuwsbrieven'
@@ -253,7 +253,7 @@ def process_sending(request, pk):
     return redirect(reverse('admin:%s_%s_changelist' % (content_type.app_label, content_type.model)))
 
 
-def send_mail(pk):
+def send_mail_task(pk):
     try:
         ns = models.NewsletterToSubscriber.objects.get(pk=pk)
         ns.send_mail()
@@ -266,6 +266,6 @@ def send_tasks():
     try:
         import django_rq
         for ns in models.NewsletterToSubscriber.objects.all():
-            django_rq.enqueue(send_mail, ns.pk, timeout=10)
+            django_rq.enqueue(send_mail_task, ns.pk, timeout=10)
     except:
         pass
