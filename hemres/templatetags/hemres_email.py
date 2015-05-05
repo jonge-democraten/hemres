@@ -1,10 +1,9 @@
 from __future__ import unicode_literals
 from future.builtins import open
 from django import template
-from django.conf import settings
 from django.contrib.staticfiles import finders
+from django.core.files.storage import default_storage
 from django.core.mail import make_msgid
-from django.utils._os import safe_join
 from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.image import MIMEImage
@@ -42,13 +41,13 @@ def emailimage_static(context, image):
 @register.simple_tag(takes_context=True, name="emailimage_media")
 def emailimage_media(context, image):
     if not context.get('render_mail', False):
-        return "{}{}".format(settings.MEDIA_URL, image)
+        return default_storage.url(image)
 
     if 'attachments' not in context:
         context['attachments'] = {}
 
     if image not in context['attachments']:
-        path = safe_join(settings.MEDIA_ROOT, image.strip('/'))
+        path = default_storage.path(image)
         if path is not None:
             with open(path, 'rb') as fh:
                 image_data = fh.read()
