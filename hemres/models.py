@@ -189,8 +189,8 @@ class NewsletterTemplate(models.Model):
         return self.title
 
     @transaction.atomic
-    def create_newsletter(self, subject):
-        a = Newsletter(template=self.template, subject=subject)
+    def create_newsletter(self, subject, owner=None):
+        a = Newsletter(template=self.template, subject=subject, owner=owner)
         a.save()
         for f in self.templateattachment_set.all():
             at = NewsletterAttachment(newsletter=a, file=f.file, attach_to_email=f.attach_to_email, content_id=f.content_id)
@@ -213,6 +213,12 @@ class Newsletter(models.Model):
     content = models.TextField(blank=True)
     date = models.DateTimeField(auto_now_add=True, blank=True)
     public = models.BooleanField(default=True)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL)
+
+    class Meta:
+        permissions = (
+            ("change_all_newsletters", "Can change all newsletters"),
+        )
 
     def __str__(self):
         return self.subject

@@ -173,7 +173,7 @@ def create_newsletter(request):
     if request.method == 'POST':
         if form.is_valid():
             template = form.cleaned_data['template']
-            newsletter = template.create_newsletter('Untitled')
+            newsletter = template.create_newsletter(subject='Untitled', owner=request.user)
             content_type = ContentType.objects.get_for_model(newsletter.__class__)
             return redirect(reverse('admin:%s_%s_change' % (content_type.app_label, content_type.model), args=(newsletter.id,)))
 

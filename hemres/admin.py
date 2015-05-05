@@ -44,7 +44,21 @@ class NewsletterAdmin(admin.ModelAdmin):
         fields = super(NewsletterAdmin, self).get_fields(request, obj=obj)
         if not request.user.has_perm('hemres.change_newslettertemplate'):
             fields.remove('template')
+        if not request.user.has_perm('hemres.change_all_newsletters'):
+            fields.remove('owner')
         return fields
+
+    def get_queryset(self, request):
+        query = super(NewsletterAdmin, self).get_queryset(request)
+        if request.user.is_superuser or request.user.has_perm('hemres.change_all_newsletters'):
+            return query
+        return query.filter(owner=request.user)
+
+    def has_change_permission(self, request, obj=None):
+        test = super(NewsletterAdmin, self).has_change_permission(request)
+        if not test or obj is None or request.user.is_superuser or request.user.has_perm('hemres.change_all_newsletters'):
+            return test
+        return obj.owner == request.user
 
     def view_mail(self, obj):
         return '<a href="%s">View in browser</a>' % (reverse('view_newsletter', args=[obj.pk]),)
