@@ -280,14 +280,15 @@ class Newsletter(models.Model):
         template = header + self.content
         template = re.sub('src="\\{\\{\s*(\S+)\s*\\}\\}"', 'src="{% emailimage \'\\1\' %}"', template)
         template = re.sub('href="\\{\\{\s*(\S+)\s*\\}\\}"', 'href="{% emailfile \'\\1\' %}"', template)
-        template = re.sub('<h1>', '<h1 style="display: inline-block; margin: 0.4em 0 0.4em 0; height: 2em; font-size: 1.6em; font-weight: bold; color: #473 !important; padding: 0px;">', template)
-        template = re.sub('<h2>', '<h2 style="display: inline-block; border-bottom: 0.4em solid white; margin: 0.8em 0 0.8em 0; height: 1em; font-size: 14px; font-weight: bold; color: white !important; padding: 3px 20px 3px 6px; background: linear-gradient(#9b3, #473);">', template)
         context['content'] = Template(template).render(Context(context))
         context['content'] = mark_safe(bleach.clean(context['content'], tags=allowed_tags, attributes=allowed_attrs))
 
         # then render whole mail
         header = "{% load hemres_email %}{% limit_filters %}{% limit_tags emailimage_media emailimage_static emailimage emailfile if endif %}"
         result = Template(header + self.template).render(Context(context))
+
+        from inlinestyler.utils import inline_css
+        result = inline_css(result)
 
         # and add any unreferenced attachments
         attachments = [mime for mime, cid in list(context['attachments'].values())]
