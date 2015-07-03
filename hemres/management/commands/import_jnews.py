@@ -62,7 +62,7 @@ class Command(BaseCommand):
             for mailing in mailings:
                 nl = Newsletter()
                 nl.subject = mailing[5]
-                nl.content = mailing[9]
+                nl.template = mailing[9]
                 nl.date = mailing[13]
                 nl.public = mailing[17]
                 nl.save()
