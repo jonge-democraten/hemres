@@ -288,7 +288,11 @@ class Newsletter(models.Model):
         result = Template(header + self.template).render(Context(context))
 
         from inlinestyler.utils import inline_css
-        result = inline_css(result)
+        from lxml.etree import XMLSyntaxError
+        try:
+            result = inline_css(result)
+        except XMLSyntaxError:
+            pass # bad luck
 
         # and add any unreferenced attachments
         attachments = [mime for mime, cid in list(context['attachments'].values())]
