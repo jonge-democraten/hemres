@@ -24,7 +24,6 @@ class NewsletterAdminForm(ModelForm):
 
 
 class NewsletterAdmin(admin.ModelAdmin):
-    list_display = ('__str__', 'date', 'view_mail', 'test_mail', 'prepare_sending')
     form = NewsletterAdminForm
 
     def get_fieldsets(self, request, obj=None):
@@ -66,6 +65,12 @@ class NewsletterAdmin(admin.ModelAdmin):
         if not test or obj is None or request.user.is_superuser or request.user.has_perm('hemres.change_all_newsletters'):
             return test
         return obj.owner == request.user
+
+    def get_list_display(self, request):
+        if request.user.has_perm('hemres.add_newslettertolist'):
+            return ('__str__', 'date', 'view_mail', 'test_mail', 'prepare_sending')
+        else:
+            return ('__str__', 'date', 'view_mail', 'test_mail')
 
     def view_mail(self, obj):
         url = reverse('view_newsletter', args=[obj.pk])
