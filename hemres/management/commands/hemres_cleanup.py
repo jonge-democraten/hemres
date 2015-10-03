@@ -5,7 +5,7 @@ from hemres.models import JaneusSubscriber
 
 
 class Command(BaseCommand):
-    help = 'Delete Janeus users that no longer exist'
+    help = 'Delete the subscriptions of Janeus users that no longer exist'
 
     def handle(self, *args, **kwargs):
         if not hasattr(settings, 'JANEUS_SERVER'):
