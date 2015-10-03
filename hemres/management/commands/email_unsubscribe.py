@@ -5,6 +5,7 @@ from hemres import models
 
 class Command(BaseCommand):
     help = 'Remove subscription of email user'
+    args = 'email list_label'
 
     def handle(self, *args, **kwargs):
         if len(args) != 2:

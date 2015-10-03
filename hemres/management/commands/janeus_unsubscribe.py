@@ -6,7 +6,8 @@ from janeus import Janeus
 
 
 class Command(BaseCommand):
-    help = 'Remove subscriptions of Janeus users'
+    help = 'Remove subscription of Janeus user'
+    args = 'member_id list_label'
 
     def handle(self, *args, **kwargs):
         if not hasattr(settings, 'JANEUS_SERVER'):
