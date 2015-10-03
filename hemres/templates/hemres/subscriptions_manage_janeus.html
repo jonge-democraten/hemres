@@ -10,14 +10,6 @@
         {% for f in form.visible_fields %}
         <div class="question">{{ f.label_tag }}{{ f }}{% if f.errors %}<div class="errors">{{ f.errors.as_text }}</div>{% endif %}</div>
         {% endfor %}
-        {% if auto_subscriptions %}
-        <div><p>Op de volgende nieuwsbrieven ben je automatisch geabonneerd:</p></div>
-        <ul>
-        {% for s in auto_subscriptions %}
-        <li>{{ s }}</li>
-        {% endfor %}
-        </ul>
-        {% endif %}
         <div class="submit"><input class="button" type="submit" value="Opslaan" /></div>
     </div>
 </form>

@@ -50,7 +50,7 @@ class Command(BaseCommand):
         # add mailing list
         s.subscriptions.add(ml)
 
-        # update for auto/required attributes
+        # update for required attributes
         s.update_janeus_newsletters()
 
         # save!

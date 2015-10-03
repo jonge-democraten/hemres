@@ -65,7 +65,6 @@ class JaneusSubscriberForm(ModelForm):
         self.fields['name'].label = "Naam"
         allowed = self.instance.get_allowed_newsletters()
         self.fields['subscriptions'].queryset = models.MailingList.objects.filter(pk__in=[int(o.pk) for o in allowed]).order_by('name')
-        self.fields['subscriptions'].widget.disabledset = self.instance.get_auto_newsletters()
 
     def save(self, *args, **kwargs):
         result = super(JaneusSubscriberForm, self).save(*args, **kwargs)

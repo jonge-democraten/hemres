@@ -56,33 +56,11 @@ class JaneusSubscriber(Subscriber):
             self.groups = []  # whoops...
         dn, attrs = res
         self.groups = set(Janeus().groups_of_dn(dn))
-        auto_membership = []
-        for s in MailingList.objects.exclude(janeus_groups_auto=''):
-            auto = set([x.strip() for x in re.split(',|\n', s.janeus_groups_auto)])
-            if len(auto.intersection(self.groups)):
-                auto_membership.append(s)
-        self.subscriptions.add(*list(auto_membership))
         for s in self.subscriptions.exclude(janeus_groups_required=''):
             req = set([x.strip() for x in re.split(',|\n', s.janeus_groups_required) if len(x.strip())])
-            if len(req.intersection(self.groups)) == 0 and s not in auto_membership:
+            if len(req.intersection(self.groups)) == 0:
                 self.subscriptions.remove(s)
-        self.subscriptions.add(*auto_membership)
         self.save()
-
-    def get_auto_newsletters(self):
-        if not hasattr(settings, 'JANEUS_SERVER'):
-            return []
-        res = Janeus().by_lidnummer(self.member_id)
-        if res is None:
-            self.groups = []  # whoops...
-        dn, attrs = res
-        self.groups = set(Janeus().groups_of_dn(dn))
-        auto_membership = []
-        for s in MailingList.objects.exclude(janeus_groups_auto=''):
-            auto = set([x.strip() for x in re.split(',|\n', s.janeus_groups_auto) if len(x.strip())])
-            if len(auto.intersection(self.groups)):
-                auto_membership.append(s)
-        return auto_membership
 
     def get_allowed_newsletters(self):
         if not hasattr(settings, 'JANEUS_SERVER'):
@@ -94,13 +72,8 @@ class JaneusSubscriber(Subscriber):
         self.groups = set(Janeus().groups_of_dn(dn))
         allowed = []
         for s in MailingList.objects.order_by('name'):
-            auto = set([x.strip() for x in re.split(',|\n', s.janeus_groups_auto) if len(x.strip())])
             req = set([x.strip() for x in re.split(',|\n', s.janeus_groups_required) if len(x.strip())])
-            if len(auto.intersection(self.groups)):
-                allowed.append(s)
-            elif len(req) == 0:
-                allowed.append(s)
-            elif len(req.intersection(self.groups)):
+            if len(req) == 0 or len(req.intersection(self.groups)):
                 allowed.append(s)
         return allowed
 
@@ -153,7 +126,6 @@ class JaneusSubscriberAccessToken(models.Model):
 class MailingList(models.Model):
     label = models.SlugField(unique=True)
     name = models.CharField(max_length=255)
-    janeus_groups_auto = models.TextField(blank=True, default='')
     janeus_groups_required = models.TextField(blank=True, default='')
 
     def __str__(self):
@@ -276,23 +248,8 @@ class NewsletterToList(models.Model):
         if self.sent:
             return  # only send once
 
-        # get auto and required Janeus groups
-        auto = set([x.strip() for x in re.split(',|\n', self.target_list.janeus_groups_auto) if len(x.strip())])
+        # get required Janeus groups
         req = set([x.strip() for x in re.split(',|\n', self.target_list.janeus_groups_required) if len(x.strip())])
-
-        # First send it to all automatic subscribers
-        autosubs = {}
-        for group in auto:
-            if hasattr(settings, 'JANEUS_SERVER'):
-                for dn, attrs in Janeus().members_of_group(group):
-                    autosubs[attrs['cn'][0]] = (attrs['sn'][0], attrs['mail'][0])
-        for sub in autosubs.values():
-            a = NewsletterToSubscriber(newsletter=self.newsletter,
-                                       subscriptions_url=self.subscriptions_url,
-                                       target_list=self.target_list,
-                                       target_name=sub[0],
-                                       target_email=sub[1])
-            a.save()
 
         # Then send to all subscribers from database
         for sub in self.target_list.subscribers.all():
@@ -313,8 +270,6 @@ class NewsletterToList(models.Model):
                     dn, attrs = res
                     mail, name = attrs['mail'][0], attrs['sn'][0]
                     send_it = True
-                    if str(sub.member_id) in autosubs:
-                        send_it = False  # already sent
                     if len(req):
                         groups = set(Janeus().groups_of_dn(dn))
                         send_it = len(req.intersection(groups)) > 0

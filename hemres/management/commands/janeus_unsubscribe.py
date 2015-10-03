@@ -49,7 +49,7 @@ class Command(BaseCommand):
         # remove mailing list
         s.subscriptions.remove(ml)
 
-        # update for auto/required attributes
+        # update for required attributes
         s.update_janeus_newsletters()
 
         # save!
