@@ -86,7 +86,7 @@ class EmailSubscriber(Subscriber):
         return "Email subscriber '{}'".format(self.email)
 
     @transaction.atomic
-    def remove_secret_newsletters(self):
+    def remove_restricted_newsletters(self):
         for s in self.subscriptions.exclude(janeus_groups_required=''):
             self.subscriptions.remove(s)
         s.save()

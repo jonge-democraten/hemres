@@ -87,6 +87,11 @@ class EmailSubscriberForm(ModelForm):
         super(EmailSubscriberForm, self).__init__(*args, **kwargs)
         self.fields['name'].label = "Naam"
 
+    def save(self, *args, **kwargs):
+        result = super(EmailSubscriberForm, self).save(*args, **kwargs)
+        result.remove_restricted_newsletters()
+        return result
+
 
 class CreateNewsletterForm(Form):
     template = ModelChoiceField(
