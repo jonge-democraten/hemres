@@ -18,7 +18,9 @@ def emailimage_static(context, image):
     if 'attachments' not in context:
         context['attachments'] = {}
 
-    if image not in context['attachments']:
+    key = "static:" + image
+
+    if key not in context['attachments']:
         path = finders.find(image)
         if path is not None:
             with open(path, 'rb') as fh:
@@ -31,9 +33,9 @@ def emailimage_static(context, image):
         mime = MIMEImage(image_data)
         mime.add_header('Content-ID', image_cid)
 
-        context['attachments'][image] = (mime, image_cid[1:-1])
+        context['attachments'][key] = (mime, image_cid[1:-1])
 
-    return "cid:{}".format(context['attachments'][image][1])
+    return "cid:{}".format(context['attachments'][key][1])
 
 
 @register.simple_tag(takes_context=True, name="emailimage_media")
@@ -44,7 +46,9 @@ def emailimage_media(context, image):
     if 'attachments' not in context:
         context['attachments'] = {}
 
-    if image not in context['attachments']:
+    key = "media:" + image
+
+    if key not in context['attachments']:
         path = default_storage.path(image)
         if path is not None:
             with open(path, 'rb') as fh:
@@ -57,9 +61,9 @@ def emailimage_media(context, image):
         mime = MIMEImage(image_data)
         mime.add_header('Content-ID', image_cid)
 
-        context['attachments'][image] = (mime, image_cid[1:-1])
+        context['attachments'][key] = (mime, image_cid[1:-1])
 
-    return "cid:{}".format(context['attachments'][image][1])
+    return "cid:{}".format(context['attachments'][key][1])
 
 
 class EmptyNode(template.Node):
