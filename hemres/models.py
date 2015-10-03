@@ -9,15 +9,10 @@ from django.template import Context, Template
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.safestring import mark_safe
-from email import encoders
-from email.mime.base import MIMEBase
 from janeus import Janeus
 import re
 import bleach
 import html2text
-
-
-from .utils import HashFileField
 
 
 # bleach is annoying with CSS handling. Just break it.
@@ -165,25 +160,11 @@ class MailingList(models.Model):
 
 
 @python_2_unicode_compatible
-class NewsletterFile(models.Model):
-    # as foreign key in M2M files form NewsletterTemplate, and NewsletterAttachment
-
-    file = HashFileField(upload_to='hemres/files/{}')
-    filename = models.CharField(max_length=255)
-    description = models.CharField(max_length=255, blank=True, null=True)
-
-    def __str__(self):
-        return self.filename
-
-
-@python_2_unicode_compatible
 class NewsletterTemplate(models.Model):
     title = models.CharField(max_length=255)
     template = models.TextField()
-    files = models.ManyToManyField(NewsletterFile, through='TemplateAttachment')
 
     # template will be copied to Newsletter
-    # each file in files will be a new NewsletterAttachment
 
     def __str__(self):
         return self.title
@@ -192,23 +173,12 @@ class NewsletterTemplate(models.Model):
     def create_newsletter(self, subject, owner=None):
         a = Newsletter(template=self.template, subject=subject, owner=owner)
         a.save()
-        for f in self.templateattachment_set.all():
-            at = NewsletterAttachment(newsletter=a, file=f.file, attach_to_email=f.attach_to_email, content_id=f.content_id)
-            at.save()
         return a
-
-
-class TemplateAttachment(models.Model):
-    template = models.ForeignKey(NewsletterTemplate)
-    file = models.ForeignKey(NewsletterFile)
-    attach_to_email = models.BooleanField(default=True)
-    content_id = models.CharField(max_length=255)
 
 
 @python_2_unicode_compatible
 class Newsletter(models.Model):
     template = models.TextField()  # copied from NewsletterTemplate
-    files = models.ManyToManyField(NewsletterFile, through='NewsletterAttachment')  # initial copied from NewsletterTemplate, attach by default
     subject = models.CharField(max_length=255)
     content = models.TextField(blank=True)
     date = models.DateTimeField(auto_now_add=True, blank=True)
@@ -243,30 +213,11 @@ class Newsletter(models.Model):
             'table': ['border', 'align', 'cellpadding', 'cellspacing'],
         }
 
-        context['files'] = {}
-        attached = []
-        for f in self.newsletterattachment_set.all():
-            context['files'][f.content_id] = f
-            if f.attach_to_email:
-                attached.append(f.file)
-
-        if not embed and len(attached):
-            # we are for browser!
-            filelist_template = "<ul>{% for f in files %}<li><a href=\"{{f.file.url}}\">{{f.filename}}</a></li>{% endfor %}</ul>"
-            filelist = Template(filelist_template).render(Context({'files': attached}))
-            context['filelist'] = mark_safe(bleach.clean(filelist, tags=allowed_tags, attributes=allowed_attrs))
-        else:
-            context['filelist'] = ''
-
         context['subject'] = mark_safe(bleach.clean(self.subject, tags=allowed_tags, attributes=allowed_attrs))
         context['name'] = mark_safe(bleach.clean(name))
         context['naam'] = mark_safe(bleach.clean(name))
 
-        # first render content
-        # only allow tags "emailimage" and "emailfile"
-        # replace src="{{blabla}}" by src="{% emailimage 'blabla' %}"
-        # replace href="{{blabla}}" by href="{% emailfile 'blabla' %}"
-        # then use bleach to restrict HTML
+        # first render content then use bleach to restrict HTML
 
         # in the template, the following context variables are defined:
         # - render_mail: Boolean, True if rendering for mail, False if for browser
@@ -274,18 +225,16 @@ class Newsletter(models.Model):
         # - subject: subject as set in Newsletter object
         # - name: name of the recipient (as set in EmailSubscriber or in LDAP)
         # - content: content after rendering
-        # - filelist: unordered list of attached files (all files with attach_to_email set), only for in browser
 
-        header = "{% load hemres_email %}{% limit_filters %}{% limit_tags emailimage_media emailimage_static emailimage emailfile %}"
+        header = "{% load hemres_email %}{% limit_filters %}{% limit_tags emailimage_media emailimage_static %}"
         template = header + self.content
-        template = re.sub('src="\\{\\{\s*(\S+)\s*\\}\\}"', 'src="{% emailimage \'\\1\' %}"', template)
-        template = re.sub('href="\\{\\{\s*(\S+)\s*\\}\\}"', 'href="{% emailfile \'\\1\' %}"', template)
         context['content'] = Template(template).render(Context(context))
         context['content'] = mark_safe(bleach.clean(context['content'], tags=allowed_tags, attributes=allowed_attrs))
 
         # then render whole mail
-        header = "{% load hemres_email %}{% limit_filters %}{% limit_tags emailimage_media emailimage_static emailimage emailfile if endif %}"
-        result = Template(header + self.template).render(Context(context))
+        header = "{% load hemres_email %}{% limit_filters %}{% limit_tags emailimage_media emailimage_static if endif %}"
+        template = header + self.template
+        result = Template(template).render(Context(context))
 
         from inlinestyler.utils import inline_css
         from lxml.etree import XMLSyntaxError
@@ -294,18 +243,8 @@ class Newsletter(models.Model):
         except XMLSyntaxError:
             pass  # bad luck
 
-        # and add any unreferenced attachments
+        # and return the result and all attachments (images)
         attachments = [mime for mime, cid in list(context['attachments'].values())]
-        for f in self.newsletterattachment_set.all():
-            if f.attach_to_email and f.content_id not in context['attachments']:
-                path = f.file.file.path
-                with open(path, 'rb') as fh:
-                    mime = MIMEBase('application', 'octet-stream')
-                    mime.set_payload(fh.read())
-                    encoders.encode_base64(mime)
-                    mime.add_header('Content-Disposition', 'attachment', filename=f.file.filename)
-                    attachments.append(mime)
-
         return result, attachments
 
     @transaction.atomic
@@ -313,13 +252,6 @@ class Newsletter(models.Model):
         a = NewsletterToList(newsletter=self, target_list=target_list, subscriptions_url=subscriptions_url)
         a.save()
         return a
-
-
-class NewsletterAttachment(models.Model):
-    newsletter = models.ForeignKey(Newsletter)
-    file = models.ForeignKey(NewsletterFile)
-    attach_to_email = models.BooleanField(default=True)
-    content_id = models.CharField(max_length=255)
 
 
 @python_2_unicode_compatible

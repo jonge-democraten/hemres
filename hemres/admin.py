@@ -2,24 +2,8 @@ from __future__ import unicode_literals
 from django.contrib import admin
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.forms import ModelForm
-from .models import JaneusSubscriber, EmailSubscriber, MailingList, Newsletter, NewsletterFile, NewsletterTemplate
+from .models import JaneusSubscriber, EmailSubscriber, MailingList, Newsletter, NewsletterTemplate
 from .models import NewsletterToList, NewsletterToSubscriber
-
-
-class TemplateAttachmentInline(admin.TabularInline):
-    model = NewsletterTemplate.files.through
-
-
-class NewsletterTemplateAdmin(admin.ModelAdmin):
-    inlines = [TemplateAttachmentInline, ]
-
-
-class NewsletterFileAdmin(admin.ModelAdmin):
-    list_display = ('__str__', 'description')
-
-
-class NewsletterAttachmentInline(admin.TabularInline):
-    model = Newsletter.files.through
 
 
 class NewsletterAdminForm(ModelForm):
@@ -41,7 +25,6 @@ class NewsletterAdminForm(ModelForm):
 
 class NewsletterAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'date', 'view_mail', 'test_mail', 'prepare_sending')
-    inlines = [NewsletterAttachmentInline, ]
     form = NewsletterAdminForm
 
     def get_fieldsets(self, request, obj=None):
@@ -142,8 +125,7 @@ class NewsletterToSubscribersAdmin(admin.ModelAdmin):
 admin.site.register(JaneusSubscriber)
 admin.site.register(EmailSubscriber)
 admin.site.register(MailingList)
-admin.site.register(NewsletterTemplate, NewsletterTemplateAdmin)
-admin.site.register(NewsletterFile, NewsletterFileAdmin)
+admin.site.register(NewsletterTemplate)
 admin.site.register(Newsletter, NewsletterAdmin)
 admin.site.register(NewsletterToList, NewsletterToListAdmin)
 admin.site.register(NewsletterToSubscriber, NewsletterToSubscribersAdmin)
