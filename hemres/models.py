@@ -292,7 +292,7 @@ class Newsletter(models.Model):
         try:
             result = inline_css(result)
         except XMLSyntaxError:
-            pass # bad luck
+            pass  # bad luck
 
         # and add any unreferenced attachments
         attachments = [mime for mime, cid in list(context['attachments'].values())]
