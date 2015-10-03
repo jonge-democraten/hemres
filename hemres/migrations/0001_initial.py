@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='EmailSubscriberAccessToken',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True, serialize=False, primary_key=True, verbose_name='ID')),
                 ('token', models.CharField(max_length=255)),
                 ('expiration_date', models.DateTimeField(default=hemres.models.create_expiration_date)),
             ],
@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='JaneusSubscriberAccessToken',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True, serialize=False, primary_key=True, verbose_name='ID')),
                 ('token', models.CharField(max_length=255)),
                 ('expiration_date', models.DateTimeField(default=hemres.models.create_expiration_date)),
             ],
@@ -37,10 +37,9 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='MailingList',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True, serialize=False, primary_key=True, verbose_name='ID')),
                 ('label', models.SlugField(unique=True)),
                 ('name', models.CharField(max_length=255)),
-                ('janeus_groups_auto', models.TextField(default='', blank=True)),
                 ('janeus_groups_required', models.TextField(default='', blank=True)),
             ],
             options={
@@ -50,13 +49,13 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Newsletter',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True, serialize=False, primary_key=True, verbose_name='ID')),
                 ('template', models.TextField()),
                 ('subject', models.CharField(max_length=255)),
                 ('content', models.TextField(blank=True)),
                 ('date', models.DateTimeField(auto_now_add=True)),
                 ('public', models.BooleanField(default=True)),
-                ('site', models.ForeignKey(editable=False, to='sites.Site')),
+                ('site', models.ForeignKey(to='sites.Site', editable=False)),
             ],
             options={
                 'abstract': False,
@@ -66,7 +65,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='NewsletterTemplate',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True, serialize=False, primary_key=True, verbose_name='ID')),
                 ('title', models.CharField(max_length=255)),
                 ('template', models.TextField()),
             ],
@@ -77,7 +76,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='NewsletterToList',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True, serialize=False, primary_key=True, verbose_name='ID')),
                 ('subscriptions_url', models.CharField(max_length=255, blank=True)),
                 ('sent', models.BooleanField(default=False)),
                 ('date', models.DateTimeField(auto_now_add=True)),
@@ -91,7 +90,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='NewsletterToSubscriber',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True, serialize=False, primary_key=True, verbose_name='ID')),
                 ('subscriptions_url', models.CharField(max_length=255, blank=True)),
                 ('target_name', models.CharField(max_length=255, blank=True)),
                 ('target_email', models.EmailField(max_length=254)),
@@ -105,8 +104,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Subscriber',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=255, default='', blank=True)),
+                ('id', models.AutoField(auto_created=True, serialize=False, primary_key=True, verbose_name='ID')),
+                ('name', models.CharField(default='', max_length=255, blank=True)),
             ],
             options={
             },
@@ -115,9 +114,9 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='JaneusSubscriber',
             fields=[
-                ('subscriber_ptr', models.OneToOneField(primary_key=True, serialize=False, to='hemres.Subscriber', auto_created=True, parent_link=True)),
+                ('subscriber_ptr', models.OneToOneField(serialize=False, to='hemres.Subscriber', primary_key=True, parent_link=True, auto_created=True)),
                 ('member_id', models.IntegerField(unique=True)),
-                ('janeus_name', models.CharField(max_length=255, default='', blank=True)),
+                ('janeus_name', models.CharField(default='', max_length=255, blank=True)),
             ],
             options={
             },
@@ -126,8 +125,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='EmailSubscriber',
             fields=[
-                ('subscriber_ptr', models.OneToOneField(primary_key=True, serialize=False, to='hemres.Subscriber', auto_created=True, parent_link=True)),
-                ('email', models.EmailField(max_length=254, unique=True)),
+                ('subscriber_ptr', models.OneToOneField(serialize=False, to='hemres.Subscriber', primary_key=True, parent_link=True, auto_created=True)),
+                ('email', models.EmailField(unique=True, max_length=254)),
             ],
             options={
             },
