@@ -34,7 +34,7 @@ class NewsletterAdmin(admin.ModelAdmin):
             }),
             (None, {
                 'fields': ('content', ),
-                'description': 'Voor de inhoud van de nieuwsbrief kun je gebruik maken van <b>vet</b> en <i>cursief</i>, van genummerde en van ongenummerde lijsten, van hyperlinks en van Heading 1, Heading 2 en Heading 3.<br/>Gebruik Heading 1 voor de eerste regel van de nieuwsbrief (de titel), gebruik Heading 2 voor de kopjes tussen onderdelen van de nieuwsbrief, en gebruik Heading 3 voor een kopje binnen een onderdeel van de nieuwsbrief.<br/>Verder wordt de tekst {{naam}} vervangen door de naam van de geaddresseerde.'
+                'description': 'Heading 1: de eerste regel van de nieuwsbrief (de titel).<br/>Heading 2: de kopjes tussen onderdelen van de nieuwsbrief.<br/>Heading 3: een kopje binnen een onderdeel van de nieuwsbrief.<br/>De tekst {{naam}} wordt vervangen door de naam van de geaddresseerde.'
             }),
             (None, {
                 'fields': ['template', 'public'],
@@ -94,14 +94,14 @@ class NewsletterToListAdmin(admin.ModelAdmin):
     process_sending.short_description = 'Send to emails'
 
     def view_mail(self, obj):
-        url = 'http://{}{}'.format(obj.newsletter.site.domain,
+        url = 'https://{}{}'.format(obj.newsletter.site.domain,
                                    reverse('view_newsletter', args=[obj.newsletter.pk]))
         return '<a href="{}">View in browser</a>'.format(url)
     view_mail.allow_tags = True
     view_mail.short_description = 'View in browser'
 
     def test_mail(self, obj):
-        url = 'http://{}{}'.format(obj.newsletter.site.domain,
+        url = 'https://{}{}'.format(obj.newsletter.site.domain,
                                    reverse('test_newsletter', args=[obj.newsletter.pk]))
         return '<a href="{}">Send test mail</a>'.format(url)
     test_mail.allow_tags = True
@@ -118,10 +118,20 @@ class NewsletterToSubscribersAdmin(admin.ModelAdmin):
     actions = [send_newsletters]
 
 
+class NewsletterTemplateAdmin(admin.ModelAdmin):
+    fieldsets = (
+            (None, {
+                'fields': ('title', 'template'),
+                'description': "Gebruik {{ naam }}, {{ subject }} en {{ content }} voor de naam van de geaddresseerde, het onderwerp van de nieuwsbrief, en de inhoud van de nieuwsbrief.</br>" +
+                               "Gebruik {{ subscriptions_url }} voor de absolute URL naar de aan- en afmeldpagina."
+            }),
+        )
+
+
 admin.site.register(JaneusSubscriber)
 admin.site.register(EmailSubscriber)
 admin.site.register(MailingList)
-admin.site.register(NewsletterTemplate)
+admin.site.register(NewsletterTemplate, NewsletterTemplateAdmin)
 admin.site.register(Newsletter, NewsletterAdmin)
 admin.site.register(NewsletterToList, NewsletterToListAdmin)
 admin.site.register(NewsletterToSubscriber, NewsletterToSubscribersAdmin)
