@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 from future.builtins import int
+from datetime import datetime, timedelta
 from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.contenttypes.models import ContentType
@@ -184,7 +185,8 @@ def view_newsletter(request, newsletter_pk):
     if request.user.is_active and request.user.is_staff:
         newsletter = get_object_or_404(models.Newsletter, pk=newsletter_pk)
     else:
-        newsletter = get_object_or_404(models.Newsletter.objects.filter(public=True), pk=newsletter_pk)
+        yearago = datetime.now() - timedelta(days=365)
+        newsletter = get_object_or_404(models.Newsletter.objects.filter(public=True).filter(date__gt=yearago), pk=newsletter_pk)
     subscriptions_url = request.build_absolute_uri(reverse(view_home))
     email, attachments = newsletter.render('Naam', False, subscriptions_url)
     return HttpResponse(email, content_type="text/html")
