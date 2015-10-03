@@ -37,34 +37,18 @@ class NewsletterAdmin(admin.ModelAdmin):
                 'description': 'Voor de inhoud van de nieuwsbrief kun je gebruik maken van <b>vet</b> en <i>cursief</i>, van genummerde en van ongenummerde lijsten, van hyperlinks en van Heading 1, Heading 2 en Heading 3.<br/>Gebruik Heading 1 voor de eerste regel van de nieuwsbrief (de titel), gebruik Heading 2 voor de kopjes tussen onderdelen van de nieuwsbrief, en gebruik Heading 3 voor een kopje binnen een onderdeel van de nieuwsbrief.<br/>Verder wordt de tekst {{naam}} vervangen door de naam van de geaddresseerde.'
             }),
             (None, {
-                'fields': ['template', 'owner', 'public'],
+                'fields': ['template', 'public'],
             }),
         )
         if not request.user.has_perm('hemres.change_newslettertemplate'):
             fieldsets[2][1]['fields'].remove('template')
-        if not request.user.has_perm('hemres.change_all_newsletters'):
-            fieldsets[2][1]['fields'].remove('owner')
         return fieldsets
 
     def get_fields(self, request, obj=None):
         fields = super(NewsletterAdmin, self).get_fields(request, obj=obj)
         if not request.user.has_perm('hemres.change_newslettertemplate'):
             fields.remove('template')
-        if not request.user.has_perm('hemres.change_all_newsletters'):
-            fields.remove('owner')
         return fields
-
-    def get_queryset(self, request):
-        query = super(NewsletterAdmin, self).get_queryset(request)
-        if request.user.is_superuser or request.user.has_perm('hemres.change_all_newsletters'):
-            return query
-        return query.filter(owner=request.user)
-
-    def has_change_permission(self, request, obj=None):
-        test = super(NewsletterAdmin, self).has_change_permission(request)
-        if not test or obj is None or request.user.is_superuser or request.user.has_perm('hemres.change_all_newsletters'):
-            return test
-        return obj.owner == request.user
 
     def get_list_display(self, request):
         if request.user.has_perm('hemres.add_newslettertolist'):
