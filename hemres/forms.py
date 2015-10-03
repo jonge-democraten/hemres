@@ -3,8 +3,11 @@ from future.builtins import super
 from future.builtins import str
 from future.builtins import int
 from builtins import object
-from django.forms import Form, EmailField, ModelForm, ModelMultipleChoiceField, ModelChoiceField
+from django.forms import Form, EmailField, ModelForm, ModelMultipleChoiceField, ModelChoiceField, CharField
 from django.forms.widgets import CheckboxSelectMultiple, CheckboxFieldRenderer, CheckboxChoiceInput, RadioSelect
+from django.utils.safestring import mark_safe
+from fullcalendar.models import Occurrence
+import re
 
 from . import models
 
@@ -40,6 +43,16 @@ class CheckboxSelectMultipleDisabled(CheckboxSelectMultiple):
         instance = CheckboxFieldDisabledRenderer(*args, **kwargs)
         instance.disabledset = self.disabledset
         return instance
+
+
+class CheckboxSelectMultipleRenderer(CheckboxFieldRenderer):
+    def render(self):
+        result = super(CheckboxSelectMultipleRenderer, self).render()
+        return mark_safe(re.sub("<ul id", '<ul class="checkboxlist" id', result, count=1))
+
+
+class CheckboxSelectMultipleCss(CheckboxSelectMultiple):
+    renderer = CheckboxSelectMultipleRenderer
 
 
 class ModelMultipleChoiceFieldDisabled(ModelMultipleChoiceField):
@@ -94,12 +107,20 @@ class EmailSubscriberForm(ModelForm):
 
 
 class CreateNewsletterForm(Form):
+    subject = CharField(required=True, label='Onderwerp')
+
     template = ModelChoiceField(
         queryset=models.NewsletterTemplate.objects.filter().order_by('title'),
         required=True,
         widget=RadioSelect,
         empty_label=None,
-        label='Templates')
+        label='Template')
+
+    events = ModelMultipleChoiceField(
+        queryset=Occurrence.objects.upcoming().order_by('start_time'),
+        required=False,
+        widget=CheckboxSelectMultipleCss,
+        label='Events')
 
 
 class TestEmailForm(Form):
