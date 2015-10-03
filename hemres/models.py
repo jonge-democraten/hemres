@@ -10,6 +10,7 @@ from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.safestring import mark_safe
 from janeus import Janeus
+from mezzanine.core.models import SiteRelated
 import re
 import bleach
 import html2text
@@ -177,7 +178,7 @@ class NewsletterTemplate(models.Model):
 
 
 @python_2_unicode_compatible
-class Newsletter(models.Model):
+class Newsletter(SiteRelated):
     template = models.TextField()  # copied from NewsletterTemplate
     subject = models.CharField(max_length=255)
     content = models.TextField(blank=True)

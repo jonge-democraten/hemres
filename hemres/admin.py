@@ -68,17 +68,20 @@ class NewsletterAdmin(admin.ModelAdmin):
         return obj.owner == request.user
 
     def view_mail(self, obj):
-        return '<a href="%s">View in browser</a>' % (reverse('view_newsletter', args=[obj.pk]),)
+        url = reverse('view_newsletter', args=[obj.pk])
+        return '<a href="{}">View in browser</a>'.format(url)
     view_mail.allow_tags = True
     view_mail.short_description = 'View in browser'
 
     def test_mail(self, obj):
-        return '<a href="%s">Send test mail</a>' % (reverse('test_newsletter', args=[obj.pk]),)
+        url = reverse('test_newsletter', args=[obj.pk])
+        return '<a href="{}">Send test mail</a>'.format(url)
     test_mail.allow_tags = True
     test_mail.short_description = 'Send test mail'
 
     def prepare_sending(self, obj):
-        return '<a href="%s">Send to list</a>' % (reverse('prepare_sending', args=[obj.pk]),)
+        url = reverse('prepare_sending', args=[obj.pk])
+        return '<a href="{}">Send to list</a>'.format(url)
     prepare_sending.allow_tags = True
     prepare_sending.short_description = 'Send to list'
 
@@ -102,12 +105,16 @@ class NewsletterToListAdmin(admin.ModelAdmin):
     process_sending.short_description = 'Send to emails'
 
     def view_mail(self, obj):
-        return '<a href="%s">View in browser</a>' % (reverse('view_newsletter', args=[obj.newsletter.pk]),)
+        url = 'http://{}{}'.format(obj.newsletter.site.domain,
+                                   reverse('view_newsletter', args=[obj.newsletter.pk]))
+        return '<a href="{}">View in browser</a>'.format(url)
     view_mail.allow_tags = True
     view_mail.short_description = 'View in browser'
 
     def test_mail(self, obj):
-        return '<a href="%s">Send test mail</a>' % (reverse('test_newsletter', args=[obj.newsletter.pk]),)
+        url = 'http://{}{}'.format(obj.newsletter.site.domain,
+                                   reverse('test_newsletter', args=[obj.newsletter.pk]))
+        return '<a href="{}">Send test mail</a>'.format(url)
     test_mail.allow_tags = True
     test_mail.short_description = 'Send test mail'
 
