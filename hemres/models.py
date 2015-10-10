@@ -154,7 +154,7 @@ class Newsletter(SiteRelated):
     template = models.TextField()  # copied from NewsletterTemplate
     subject = models.CharField(max_length=255)
     content = models.TextField(blank=True)
-    date = models.DateTimeField(auto_now_add=True, blank=True)
+    date = models.DateTimeField(default=timezone.now, blank=True)
     public = models.BooleanField(default=True)
 
     def __str__(self):
