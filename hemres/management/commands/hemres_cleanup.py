@@ -2,6 +2,7 @@ from __future__ import print_function
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from hemres.models import JaneusSubscriber
+from janeus import Janeus
 
 
 class Command(BaseCommand):

@@ -36,9 +36,6 @@ class Command(BaseCommand):
             print("Janeus user not found!")
             return
 
-        # retrieve name of user
-        name = res[1]['sn'][0]
-
         # retrieve Janeus subscriber
         s = models.JaneusSubscriber.objects.filter(member_id=int(member_id))
         if len(s):

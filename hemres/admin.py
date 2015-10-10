@@ -95,14 +95,14 @@ class NewsletterToListAdmin(admin.ModelAdmin):
 
     def view_mail(self, obj):
         url = 'https://{}{}'.format(obj.newsletter.site.domain,
-                                   reverse('view_newsletter', args=[obj.newsletter.pk]))
+                                    reverse('view_newsletter', args=[obj.newsletter.pk]))
         return '<a href="{}">View in browser</a>'.format(url)
     view_mail.allow_tags = True
     view_mail.short_description = 'View in browser'
 
     def test_mail(self, obj):
         url = 'https://{}{}'.format(obj.newsletter.site.domain,
-                                   reverse('test_newsletter', args=[obj.newsletter.pk]))
+                                    reverse('test_newsletter', args=[obj.newsletter.pk]))
         return '<a href="{}">Send test mail</a>'.format(url)
     test_mail.allow_tags = True
     test_mail.short_description = 'Send test mail'
@@ -120,12 +120,12 @@ class NewsletterToSubscribersAdmin(admin.ModelAdmin):
 
 class NewsletterTemplateAdmin(admin.ModelAdmin):
     fieldsets = (
-            (None, {
-                'fields': ('title', 'template'),
-                'description': "Gebruik {{ naam }}, {{ subject }} en {{ content }} voor de naam van de geaddresseerde, het onderwerp van de nieuwsbrief, en de inhoud van de nieuwsbrief.</br>" +
-                               "Gebruik {{ subscriptions_url }} voor de absolute URL naar de aan- en afmeldpagina."
-            }),
-        )
+        (None, {
+            'fields': ('title', 'template'),
+            'description': "Gebruik {{ naam }}, {{ subject }} en {{ content }} voor de naam van de geaddresseerde, het onderwerp van de nieuwsbrief, en de inhoud van de nieuwsbrief.</br>" +
+                           "Gebruik {{ subscriptions_url }} voor de absolute URL naar de aan- en afmeldpagina."
+        }),
+    )
 
 
 admin.site.register(JaneusSubscriber)
