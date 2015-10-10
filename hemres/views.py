@@ -119,12 +119,15 @@ def create_fresh_email_token(subscriber):
 
 def send_subscriber_mail(emailaddress, request):
     # knowledge of 'request' necessary to compose mail
-    email_to_send, attachments = compose_mail(emailaddress, True, request=request)
+    html_content, attachments = compose_mail(emailaddress, True, request=request)
+    h = html2text.HTML2Text()
+    h.ignore_images = True
+    text_content = h.handle(html_content)
+
     subject = 'Jonge Democraten Nieuwsbrieven'
     from_email = getattr(settings, 'HEMRES_FROM_ADDRESS', 'noreply@jongedemocraten.nl')
-    msg = EmailMultiAlternatives(subject=subject, body=email_to_send, from_email=from_email, to=[emailaddress])
-    # msg.attach_alternative(email_to_send, "text/html")
-    msg.content_subtype = "html"
+    msg = EmailMultiAlternatives(subject=subject, body=text_content, from_email=from_email, to=[emailaddress])
+    msg.attach_alternative(html_content, "text/html")
     msg.mixed_subtype = 'related'
     for a in attachments:
         msg.attach(a)
