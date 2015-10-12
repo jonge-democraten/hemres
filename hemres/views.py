@@ -261,7 +261,7 @@ def test_newsletter(request, pk):
 
 
 @staff_member_required
-@permission_required('hemres.send_to_list')
+@permission_required('hemres.add_newslettertolist')
 def prepare_sending(request, pk):
     newsletter = get_object_or_404(models.Newsletter, pk=pk)
     if request.method == 'POST':

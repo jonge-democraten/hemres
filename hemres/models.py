@@ -160,11 +160,6 @@ class Newsletter(SiteRelated):
     def __str__(self):
         return self.subject
 
-    class Meta:
-        permissions = (
-            ("send_to_list", "Can send newsletter to a list (step 1)"),
-        )
-
     def render(self, name, embed, subscriptions_url):
         # Render email, set embed=True for sending mail, or embed=False for viewing in browser
 
