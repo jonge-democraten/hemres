@@ -25,6 +25,7 @@ class NewsletterAdminForm(ModelForm):
 
 class NewsletterAdmin(admin.ModelAdmin):
     form = NewsletterAdminForm
+    search_fields = ('subject', 'content')
 
     def get_fieldsets(self, request, obj=None):
         fieldsets = (
