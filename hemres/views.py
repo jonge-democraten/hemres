@@ -14,6 +14,7 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 from django.views.generic.edit import UpdateView
 from mezzanine.conf import settings as msettings
+from mezzanine.utils.sites import current_site_id
 import hashlib
 import os
 import html2text
@@ -305,3 +306,17 @@ def send_tasks():
             django_rq.enqueue(send_mail_task, ns.pk, timeout=10)
     except:
         pass
+
+
+def list_all(request):
+    # Find all Newsletters of the current site
+    site_id = current_site_id()
+    if request.user.is_active and request.user.is_staff:
+        letters = models.Newsletter.objects.filter(site__id__exact=site_id)
+        letters = models.NewsletterToList.objects.order_by('-date').values('target_list__name', 'newsletter_id','newsletter__subject','date').filter(newsletter__in=letters)
+    else:
+        yearago = datetime.now() - timedelta(days=365)
+        letters = models.Newsletter.objects.filter(site__id__exact=site_id)
+        letters = models.NewsletterToList.objects.filter(target_list__janeus_groups_required='', newsletter__public=True,date__gt=yearago).order_by('-date').values('target_list__name', 'newsletter_id','newsletter__subject','date').filter(newsletter__in=letters)
+    letters = [{'id': s['newsletter_id'], 'subject': '[{}] {}'.format(s['target_list__name'], s['newsletter__subject']), 'date': s['date']} for s in letters]
+    return render(request, 'hemres/list.html', {'letters': letters})

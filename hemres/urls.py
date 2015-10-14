@@ -13,4 +13,5 @@ urlpatterns = patterns(
     url(r'^test/(?P<pk>\d+)$', views.test_newsletter, name='test_newsletter'),
     url(r'^prepare/(?P<pk>\d+)$', views.prepare_sending, name='prepare_sending'),
     url(r'^process/(?P<pk>\d+)$', views.process_sending, name='process_sending'),
+    url(r'^list/$', views.list_all, name='list_all'),
 )
