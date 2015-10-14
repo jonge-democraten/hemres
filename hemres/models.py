@@ -238,7 +238,7 @@ class NewsletterToList(models.Model):
     target_list = models.ForeignKey(MailingList, null=False)
     subscriptions_url = models.CharField(max_length=255, blank=True)
     sent = models.BooleanField(default=False)
-    date = models.DateTimeField(auto_now_add=True, blank=True)
+    date = models.DateTimeField(default=timezone.now, blank=True)
 
     def __str__(self):
         return "'{}' to '{}'".format(self.newsletter, self.target_list)
