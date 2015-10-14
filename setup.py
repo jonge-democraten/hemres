@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='hemres',
-    version='0.8',
+    version='0.9',
     packages=['hemres', 'hemres.migrations', 'hemres.templatetags'],
     url='http://github.com/jonge-democraten/hemres/',
     author='Jonge Democraten',
