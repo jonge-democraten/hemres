@@ -52,7 +52,7 @@ class NewsletterAdmin(admin.ModelAdmin):
         return fields
 
     def get_list_display(self, request):
-        if request.user.has_perm('hemres.add_newslettertolist'):
+        if request.user.has_perm('hemres.add_newsletter'):
             return ('__str__', 'date', 'view_mail', 'test_mail', 'prepare_sending')
         else:
             return ('__str__', 'date', 'view_mail', 'test_mail')
