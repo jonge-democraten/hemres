@@ -89,7 +89,7 @@ class EmailSubscriber(Subscriber):
     def remove_restricted_newsletters(self):
         for s in self.subscriptions.exclude(janeus_groups_required=''):
             self.subscriptions.remove(s)
-        s.save()
+        self.save()
 
 
 def create_expiration_date():
