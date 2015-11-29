@@ -127,6 +127,8 @@ class MailingList(models.Model):
     label = models.SlugField(unique=True)
     name = models.CharField(max_length=255)
     janeus_groups_required = models.TextField(blank=True, default='')
+    from_email = models.EmailField(max_length=254, blank=True)
+    from_name = models.CharField(max_length=255, blank=True)
 
     def __str__(self):
         return self.name
@@ -303,9 +305,20 @@ class NewsletterToSubscriber(models.Model):
         h = html2text.HTML2Text()
         h.ignore_images = True
         text_content = h.handle(html_content)
-        from_email = getattr(settings, 'HEMRES_FROM_ADDRESS', 'noreply@jongedemocraten.nl')
+        if self.target_list.from_email != '':
+            if self.target_list.from_name != '':
+                from_email = "{} <{}>".format(self.target_list.from_name, self.target_list.from_email)
+            else:
+                from_email = self.target_list.from_email
+        else:
+            from_email = getattr(settings, 'HEMRES_FROM_ADDRESS', 'noreply@jongedemocraten.nl')
 
-        msg = EmailMultiAlternatives(subject=subject, body=text_content, from_email=from_email, to=[self.target_email])
+        if self.target_name != '':
+            to_email = "{} <{}>".format(self.target_name, self.target_email)
+        else:
+            to_email = self.target_email
+
+        msg = EmailMultiAlternatives(subject=subject, body=text_content, from_email=from_email, to=[to_email])
         msg.attach_alternative(html_content, "text/html")
         msg.mixed_subtype = 'related'
         for a in attachments:
