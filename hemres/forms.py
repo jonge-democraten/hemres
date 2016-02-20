@@ -3,6 +3,7 @@ from future.builtins import super
 from future.builtins import str
 from future.builtins import int
 from builtins import object
+from django.contrib.sites.models import Site
 from django.forms import Form, EmailField, ModelForm, ModelMultipleChoiceField, ModelChoiceField, CharField
 from django.forms.widgets import CheckboxSelectMultiple, CheckboxFieldRenderer, CheckboxChoiceInput, RadioSelect
 from django.utils.safestring import mark_safe
@@ -63,6 +64,22 @@ class ModelMultipleChoiceFieldDisabled(ModelMultipleChoiceField):
         self.widget.disabledset = disabledset
 
 
+class EventField(ModelMultipleChoiceField):
+    def __init__(self, *args, **kwargs):
+        super(EventField, self).__init__(*args, **kwargs)
+        # get all sites in occurrences
+        sites = list(Site.objects.filter(occurrence__in=tuple(self.queryset)).order_by('name'))
+        # fill choices
+        self.choices = []
+        for site in sites:
+            # get occurrences for this site
+            occurrences = self.queryset.filter(site=site)
+            # convert to (value, label)
+            occurrences = (tuple((self.prepare_value(o), self.label_from_instance(o))) for o in occurrences)
+            # add to choices
+            self.choices.append(tuple((site.name, tuple(occurrences))))
+
+
 class JaneusSubscriberForm(ModelForm):
     subscriptions = ModelMultipleChoiceFieldDisabled(
         queryset=models.MailingList.objects.order_by('name'),
@@ -116,7 +133,7 @@ class CreateNewsletterForm(Form):
         empty_label=None,
         label='Template')
 
-    events = ModelMultipleChoiceField(
+    events = EventField(
         queryset=Occurrence.objects.upcoming().order_by('start_time'),
         required=False,
         widget=CheckboxSelectMultipleCss,
