@@ -67,17 +67,20 @@ class ModelMultipleChoiceFieldDisabled(ModelMultipleChoiceField):
 class EventField(ModelMultipleChoiceField):
     def __init__(self, *args, **kwargs):
         super(EventField, self).__init__(*args, **kwargs)
+
+    @property
+    def _choices(self):
         # get all sites in occurrences
-        sites = list(Site.objects.filter(occurrence__in=tuple(self.queryset)).order_by('name'))
+        occ = tuple(self.queryset.select_related('site'))
+        sites = list(Site.objects.filter(occurrence__in=occ).distinct().order_by('name'))
         # fill choices
-        self.choices = []
+        choices = []
         for site in sites:
-            # get occurrences for this site
-            occurrences = self.queryset.filter(site=site)
-            # convert to (value, label)
-            occurrences = (tuple((self.prepare_value(o), self.label_from_instance(o))) for o in occurrences)
+            # get occurrences for this site and convert to (value, label)
+            occurrences = (tuple((self.prepare_value(o), self.label_from_instance(o))) for o in occ if o.site==site)
             # add to choices
-            self.choices.append(tuple((site.name, tuple(occurrences))))
+            choices.append((site.name, tuple(occurrences)))
+        return choices
 
 
 class JaneusSubscriberForm(ModelForm):
