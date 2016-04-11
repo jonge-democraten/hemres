@@ -186,6 +186,7 @@ def create_newsletter(request):
         newsletter.content += "<p>Introductietekst</p>"
         if len(form.cleaned_data['events']):
             newsletter.content += "<h2 id='agenda'>Agenda</h2>"
+        current_site = current_site_id()
         for o in form.cleaned_data['events']:
             start = timezone.localtime(o.start_time)
             end = timezone.localtime(o.end_time)
@@ -200,7 +201,12 @@ def create_newsletter(request):
             if msettings.SSL_ENABLED:
                 protocol = "https"
 
-            newsletter.content += '<h3 class="agendaitem"><a href="{}://{}{}">{}</a></h3>'.format(protocol, o.event.site.domain, o.get_absolute_url(), o.title)
+            if o.event.site.id != current_site:
+                tag = "<strong>[{}]</strong> ".format(o.event.site.name)
+            else:
+                tag = ""
+
+            newsletter.content += '<h3 class="agendaitem">{}<a href="{}://{}{}">{}</a></h3>'.format(tag, protocol, o.event.site.domain, o.get_absolute_url(), o.title)
             newsletter.content += "<p>"
             newsletter.content += "<strong>Wanneer</strong>: {}<br/>".format(duration)
             newsletter.content += "<strong>Waar</strong>: {}<br/>".format(o.location)
