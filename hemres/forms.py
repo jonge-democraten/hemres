@@ -65,11 +65,13 @@ class ModelMultipleChoiceFieldDisabled(ModelMultipleChoiceField):
 
 
 class EventField(ModelMultipleChoiceField):
-    def __init__(self, *args, **kwargs):
-        super(EventField, self).__init__(*args, **kwargs)
+    def __deepcopy__(self, memo):
+        result = super(EventField, self).__deepcopy__(memo)
+        result.queryset = Occurrence.objects.upcoming().order_by('start_time')
+        result.populate_choices()
+        return result
 
-    @property
-    def _choices(self):
+    def populate_choices(self):
         # get all sites in occurrences
         occ = tuple(self.queryset.select_related('site'))
         sites = list(Site.objects.filter(occurrence__in=occ).distinct().order_by('name'))
@@ -80,7 +82,7 @@ class EventField(ModelMultipleChoiceField):
             occurrences = (tuple((self.prepare_value(o), self.label_from_instance(o))) for o in occ if o.site==site)
             # add to choices
             choices.append((site.name, tuple(occurrences)))
-        return choices
+        self.choices = choices
 
 
 class JaneusSubscriberForm(ModelForm):
