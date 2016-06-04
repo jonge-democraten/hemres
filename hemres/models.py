@@ -230,6 +230,10 @@ class Newsletter(SiteRelated):
         a.save()
         return a
 
+    def fix_relative_urls(self, request):
+        # fix relative static urls
+        self.content = re.sub('href="([^"]*)"', lambda x: 'href="{}"'.format(request.build_absolute_uri(x.group(1))), self.content)
+        self.content = re.sub('src="([^"]*)"', lambda x: 'src="{}"'.format(request.build_absolute_uri(x.group(1))), self.content)
 
 @python_2_unicode_compatible
 class NewsletterToList(models.Model):

@@ -82,6 +82,10 @@ class NewsletterAdmin(admin.ModelAdmin):
         urlpatterns = [url(r'^create_newsletter$', RedirectView.as_view(url=reverse_lazy('create_newsletter')), name='%s_%s_add' % info)]
         return super(NewsletterAdmin, self).get_urls() + urlpatterns
 
+    def save_model(self, request, obj, form, change):
+        obj.fix_relative_urls(request)
+        obj.save()
+
 
 class NewsletterToListAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'view_mail', 'test_mail', 'process_sending', 'date')
