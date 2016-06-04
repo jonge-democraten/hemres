@@ -174,7 +174,7 @@ class Newsletter(SiteRelated):
         context['subscriptions_url'] = subscriptions_url
         context['attachments'] = {}  # receives MIME attachments
 
-        allowed_tags = ['a', 'b', 'blockquote', 'caption', 'code', 'em', 'h1', 'h2', 'h3', 'i', 'img', 'strong', 'ul', 'ol', 'li', 'p', 'br', 'span', 'table', 'tbody', 'tr', 'td', 'thead', 'div', 'span']
+        allowed_tags = ['a', 'b', 'blockquote', 'caption', 'code', 'em', 'h1', 'h2', 'h3', 'hr', 'i', 'img', 'strong', 'ul', 'ol', 'li', 'p', 'br', 'span', 'table', 'tbody', 'tr', 'td', 'thead', 'div', 'span']
         allowed_attrs = {
             '*': ['class', 'style'],
             'a': ['href', 'target'],
