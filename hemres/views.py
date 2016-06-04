@@ -13,6 +13,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.views.generic.edit import UpdateView
+from html.parser import HTMLParser
 from mezzanine.conf import settings as msettings
 from mezzanine.utils.sites import current_site_id
 import hashlib
@@ -326,3 +327,26 @@ def list_all(request):
         letters = models.NewsletterToList.objects.filter(target_list__janeus_groups_required='', newsletter__public=True,date__gt=yearago).order_by('-date').values('target_list__name', 'newsletter_id','newsletter__subject','date').filter(newsletter__in=letters)
     letters = [{'id': s['newsletter_id'], 'subject': '[{}] {}'.format(s['target_list__name'], s['newsletter__subject']), 'date': s['date']} for s in letters]
     return render(request, 'hemres/list.html', {'letters': letters})
+
+
+class CSSExtract(HTMLParser):
+    style = False
+    data = ""
+
+    def handle_starttag(self, tag, attrs):
+        self.style = tag == "style"
+
+    def handle_endtag(self, tag):
+        self.style = False
+
+    def handle_data(self, data):
+        if self.style:
+            self.data += data
+
+
+@staff_member_required
+def get_css(request, pk):
+    newsletter = get_object_or_404(models.Newsletter, pk=pk)
+    parser = CSSExtract()
+    parser.feed(newsletter.template)
+    return HttpResponse(parser.data, content_type="text/css")
