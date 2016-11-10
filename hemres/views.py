@@ -14,6 +14,7 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 from django.views.generic.edit import UpdateView
 from html.parser import HTMLParser
+import logging
 from mezzanine.conf import settings as msettings
 from mezzanine.utils.sites import current_site_id
 import hashlib
@@ -24,6 +25,9 @@ from janeus import Janeus
 
 from . import models
 from . import forms
+
+
+logger = logging.getLogger(__name__)
 
 
 def view_home(request):
@@ -299,10 +303,16 @@ def process_sending(request, pk):
 
 def send_mail_task(pk):
     try:
+        logger.info("Obtaining {}...".format(pk))
         ns = models.NewsletterToSubscriber.objects.get(pk=pk)
-        ns.send_mail()
-    except:
-        pass
+        if ns.target_email == "":
+            logger.info("Skipping {} due to no email address".format(pk))
+            ns.delete()
+        else:
+            logger.info("Sending {}...".format(pk))
+            ns.send_mail()
+    except Exception as e:
+        logger.exception(e)
 
 
 def send_tasks():
@@ -310,9 +320,14 @@ def send_tasks():
     try:
         import django_rq
         for ns in models.NewsletterToSubscriber.objects.all():
-            django_rq.enqueue(send_mail_task, ns.pk, timeout=10)
-    except:
-        pass
+            if ns.target_email == "":
+                logger.info("Skipping {} due to no email address".format(ns.pk))
+                ns.delete()
+            else:
+                logger.info("Enqueueing {}...".format(ns.pk))
+                django_rq.enqueue(send_mail_task, ns.pk, timeout=10)
+    except Exception as e:
+        logger.exception(e)
 
 
 def list_all(request):
