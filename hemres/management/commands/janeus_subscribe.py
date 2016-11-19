@@ -21,7 +21,10 @@ class Command(BaseCommand):
         # get member_id and label from args
         member_id = int(args[0])
         label = str(args[1])
+        self.subscribe(member_id, label)
 
+    @staticmethod
+    def subscribe(member_id, label):
         # retrieve MailingList to add
         qs = models.MailingList.objects.filter(label=label)
         if len(qs):
