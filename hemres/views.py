@@ -296,38 +296,8 @@ def prepare_sending(request, pk):
 def process_sending(request, pk):
     newsletter_to_list = get_object_or_404(models.NewsletterToList, pk=pk)
     newsletter_to_list.process()
-    send_tasks()
     content_type = ContentType.objects.get_for_model(models.NewsletterToList)
     return redirect(reverse('admin:%s_%s_changelist' % (content_type.app_label, content_type.model)))
-
-
-def send_mail_task(pk):
-    try:
-        logger.info("Obtaining {}...".format(pk))
-        ns = models.NewsletterToSubscriber.objects.get(pk=pk)
-        if ns.target_email == "":
-            logger.info("Skipping {} due to no email address".format(pk))
-            ns.delete()
-        else:
-            logger.info("Sending {}...".format(pk))
-            ns.send_mail()
-    except Exception as e:
-        logger.exception(e)
-
-
-def send_tasks():
-    # This fails (silently) if django_rq is not available.
-    try:
-        import django_rq
-        for ns in models.NewsletterToSubscriber.objects.all():
-            if ns.target_email == "":
-                logger.info("Skipping {} due to no email address".format(ns.pk))
-                ns.delete()
-            else:
-                logger.info("Enqueueing {}...".format(ns.pk))
-                django_rq.enqueue(send_mail_task, ns.pk, timeout=10)
-    except Exception as e:
-        logger.exception(e)
 
 
 def list_all(request):
