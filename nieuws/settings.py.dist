@@ -92,13 +92,3 @@ EMAIL_PORT = 587
 # JANEUS_DN="cn=readuser,ou=sysUsers,dc=jd,dc=nl"
 # JANEUS_PASS=""
 # AUTHENTICATION_BACKENDS = ('janeus.backend.JaneusBackend', 'django.contrib.auth.backends.ModelBackend',)
-
-RQ_QUEUES = {
-    'default': {
-        'HOST': 'localhost',
-        'PORT': 6379,
-        'DB': 0,
-        'PASSWORD': '',
-        'DEFAULT_TIMEOUT': 360,
-    },
-}
