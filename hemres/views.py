@@ -15,8 +15,6 @@ from django.utils import timezone
 from django.views.generic.edit import UpdateView
 from html.parser import HTMLParser
 import logging
-from mezzanine.conf import settings as msettings
-from mezzanine.utils.sites import current_site_id
 import hashlib
 import os
 import html2text
@@ -25,6 +23,12 @@ from janeus import Janeus
 
 from . import models
 from . import forms
+
+
+try:
+    from mezzanine.utils.sites import current_site_id
+except:
+    from .siterelated import current_site_id
 
 
 logger = logging.getLogger(__name__)
@@ -203,8 +207,14 @@ def create_newsletter(request):
                 duration += ' - {:%A, %d %B %Y %H:%M}'.format(end)
 
             protocol = "http"
-            if msettings.SSL_ENABLED:
-                protocol = "https"
+
+            # Set protocol to https if we have mezzanine and mezzanine has SSL_ENABLED set
+            try:
+                from mezzanine.conf import settings as msettings
+                if getattr(msettings, 'SSL_ENABLED', False):
+                    protocol = "https"
+            except:
+                pass
 
             if o.event.site.id != current_site:
                 tag = "<strong>[{}]</strong> ".format(o.event.site.name)
