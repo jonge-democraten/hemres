@@ -17,6 +17,7 @@ from html.parser import HTMLParser
 import logging
 from mezzanine.conf import settings as msettings
 from mezzanine.utils.sites import current_site_id
+from smtplib import SMTPRecipientsRefused
 import hashlib
 import os
 import html2text
@@ -137,7 +138,10 @@ def send_subscriber_mail(emailaddress, request):
     msg.mixed_subtype = 'related'
     for a in attachments:
         msg.attach(a)
-    msg.send()
+    try:
+        msg.send()
+    except SMTPRecipientsRefused:
+        pass
 
 
 @transaction.atomic
