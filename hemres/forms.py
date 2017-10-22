@@ -7,10 +7,30 @@ from django.contrib.sites.models import Site
 from django.forms import Form, EmailField, ModelForm, ModelMultipleChoiceField, ModelChoiceField, CharField
 from django.forms.widgets import CheckboxSelectMultiple, CheckboxFieldRenderer, CheckboxChoiceInput, RadioSelect
 from django.utils.safestring import mark_safe
-from fullcalendar.models import Occurrence
 import re
 
 from . import models
+
+
+try:
+    # Determine if we actually have (Mezzanine) fullcalendar
+    from fullcalendar.models import Occurrence
+    has_fullcalendar = True
+except:
+    has_fullcalendar = False
+
+
+def get_upcoming_events():
+    """
+    Obtain a QuerySet with upcoming events, or a dummy
+    empty QuerySet if (Mezzanine) fullcalendar is not installed.
+    """
+    try:
+        from fullcalendar.models import Occurrence
+        return Occurrence.objects.upcoming().order_by('start_time')
+    except:
+        # use a dummy to get an empty QuerySet
+        return models.Subscriber.objects.none()
 
 
 class SubscriptionEmailForm(Form):
@@ -67,11 +87,14 @@ class ModelMultipleChoiceFieldDisabled(ModelMultipleChoiceField):
 class EventField(ModelMultipleChoiceField):
     def __deepcopy__(self, memo):
         result = super(EventField, self).__deepcopy__(memo)
-        result.queryset = Occurrence.objects.upcoming().order_by('start_time')
+        result.queryset = get_upcoming_events()
         result.populate_choices()
         return result
 
     def populate_choices(self):
+        # this is just a hack in the case we do not have mezzanine
+        if not has_fullcalendar:
+            return
         # get all sites in occurrences
         occ = tuple(self.queryset.select_related('site'))
         sites = list(Site.objects.filter(occurrence__in=occ).distinct().order_by('name'))
@@ -139,7 +162,7 @@ class CreateNewsletterForm(ModelForm):
         label='Template')
 
     events = EventField(
-        queryset=Occurrence.objects.upcoming().order_by('start_time'),
+        queryset=get_upcoming_events(),
         required=False,
         widget=CheckboxSelectMultipleCss,
         label='Events')

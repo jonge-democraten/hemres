@@ -10,12 +10,15 @@ from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.safestring import mark_safe
 from janeus import Janeus
-from mezzanine.core.models import SiteRelated
 import re
 import bleach
 import html2text
 
 
+try:
+    from mezzanine.core.models import SiteRelated
+except:
+    from .siterelated import SiteRelated
 
 
 @python_2_unicode_compatible

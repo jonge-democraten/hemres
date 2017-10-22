@@ -15,8 +15,6 @@ from django.utils import timezone
 from django.views.generic.edit import UpdateView
 from html.parser import HTMLParser
 import logging
-from mezzanine.conf import settings as msettings
-from mezzanine.utils.sites import current_site_id
 from smtplib import SMTPRecipientsRefused
 import hashlib
 import os
@@ -26,6 +24,12 @@ from janeus import Janeus
 
 from . import models
 from . import forms
+
+
+try:
+    from mezzanine.utils.sites import current_site_id
+except:
+    from .siterelated import current_site_id
 
 
 logger = logging.getLogger(__name__)

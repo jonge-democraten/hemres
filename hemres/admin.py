@@ -3,11 +3,15 @@ from django.contrib import admin
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.forms import ModelForm
 from django.utils import timezone
-from mezzanine.conf import settings as msettings
-from mezzanine.utils.sites import current_site_id
 from .models import JaneusSubscriber, EmailSubscriber, MailingList, Newsletter, NewsletterTemplate
 from .models import NewsletterToList, NewsletterToSubscriber
 from .forms import CreateNewsletterForm
+
+
+try:
+    from mezzanine.utils.sites import current_site_id
+except:
+    from .siterelated import current_site_id
 
 
 class NewsletterAdminForm(ModelForm):
@@ -133,8 +137,12 @@ class NewsletterAdmin(admin.ModelAdmin):
 
             # for URLs to the site, look if we have SSL_ENABLED and choose https if so
             protocol = "http"
-            if msettings.SSL_ENABLED:
-                protocol = "https"
+            try:
+                from mezzanine.conf import settings as msettings
+                if msettings.SSL_ENABLED:
+                    protocol = "https"
+            except:
+                pass
 
             if o.event.site.id != current_site:
                 tag = "<strong>[{}]</strong> ".format(o.event.site.name)
