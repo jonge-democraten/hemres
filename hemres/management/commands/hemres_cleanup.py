@@ -9,9 +9,18 @@ from janeus import Janeus
 class Command(BaseCommand):
     help = 'Delete the subscriptions of Janeus users that no longer exist and of email subscribers without subscriptions'
 
+    def add_arguments(self, parser):
+        parser.add_argument('-n', '--dryrun,', action='store_true', dest='dryrun', default=False, help='Do not actually delete anything')
+
     def handle(self, *args, **kwargs):
+        # if cleanup receives any arguments, interpret as "dry run"
+        do_not_delete = kwargs['dryrun']
+        if do_not_delete:
+            print("Dry run of cleanup, not actually deleting anything.")
+
         for s in EmailSubscriber.objects.annotate(num=models.Count('subscriptions')).filter(num=0):
-            s.delete()
+            print("Deleting {}.".format(str(s)))
+            if not do_not_delete: s.delete()
 
         if not hasattr(settings, 'JANEUS_SERVER'):
             print("Janeus is not configured!")
@@ -19,5 +28,5 @@ class Command(BaseCommand):
 
         for s in JaneusSubscriber.objects.all():
             if Janeus().by_lidnummer(s.member_id) is None:
-                print("Deleted {}".format(s.member_id))
-                s.delete()
+                print("Deleting {}".format(s.member_id))
+                if not do_not_delete: s.delete()
