@@ -1,8 +1,8 @@
 from django.core.management.base import BaseCommand
 from hemres import models
 from filelock import FileLock, Timeout
+from smtplib import SMTPRecipientsRefused
 import logging
-import time
 
 
 logger = logging.getLogger(__name__)
@@ -28,9 +28,6 @@ class Command(BaseCommand):
                 if ns.target_email == "":
                     logger.info("Skipping and deleting {} due to no email address".format(ns.pk))
                     ns.delete()
-                elif ns.pk in self.failing_pks:
-                    # Do not try sending if we had an exception last time we tried...
-                    pass
                 else:
                     logger.info("Sending {}...".format(ns.pk))
                     try:
@@ -39,9 +36,11 @@ class Command(BaseCommand):
                         # Note that Django turns "autocommit" on for database transactions,
                         # this is important as otherwise our DELETE queries are never committed.
                         ns.send_mail()
+                    except SMTPRecipientsRefused as e:
+                        logger.exception(e)
+                        ns.delete()
                     except Exception as e:
                         logger.exception(e)
-                        self.failing_pks.append(ns.pk)
         except Exception as e:
             logger.exception(e)
 
@@ -50,7 +49,6 @@ class Command(BaseCommand):
         try:
             with FileLock(kwargs['lock_filename'], timeout=0):
                 logger.info("Going to send mails")
-                self.failing_pks = []
                 self.send_mails()
                 logger.info("Done, bye!")
         except Timeout:
