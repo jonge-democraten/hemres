@@ -1,14 +1,13 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name='hemres',
-    version='0.11',
-    packages=['hemres', 'hemres.migrations', 'hemres.templatetags'],
+    version='0.18',
+    description='Newsletter module for Jonge Democraten websites',
+    packages=find_packages(),
     url='http://github.com/jonge-democraten/hemres/',
     author='Jonge Democraten',
-    author_email='ict@jongedemocraten.nl',
-    description='Webapp for sending newsletters',
     include_package_data=True,
-    install_requires=['html2text>=2015.6.21', 'bleach>=1.4.2', 'inlinestyler>=0.2.1', 'future>=0.15.2'],
     license='MIT',
+    install_requires=['bleach>=1.5','filelock>=2.0'],
 )
