@@ -16,8 +16,6 @@ import bleach
 import html2text
 
 
-# bleach is annoying with CSS handling. Just break it.
-bleach.BleachSanitizer.sanitize_css = lambda self, style: style
 
 
 @python_2_unicode_compatible
@@ -181,10 +179,12 @@ class Newsletter(SiteRelated):
             'img': ['src', 'alt', 'width', 'height'],
             'table': ['border', 'align', 'cellpadding', 'cellspacing'],
         }
+        allowed_protocols = ['http', 'https', 'mailto', 'cid']
 
-        # hack to allow cid as protocol for images
-        if 'cid' not in bleach.BleachSanitizer.allowed_protocols:
-            bleach.BleachSanitizer.allowed_protocols += ["cid"]
+        class AllowAllStyles(object):
+            def __contains__(self, value):
+                return True
+        allowed_styles = AllowAllStyles()
 
         context['subject'] = mark_safe(bleach.clean(self.subject, tags=allowed_tags, attributes=allowed_attrs))
         context['name'] = mark_safe(bleach.clean(name))
@@ -204,7 +204,7 @@ class Newsletter(SiteRelated):
         template = re.sub('src="{}([^"]*)"'.format(settings.MEDIA_URL), 'src="{% emailimage_media \'\\1\' %}"', template)
         template = re.sub('src="{}([^"]*)"'.format(settings.STATIC_URL), 'src="{% emailimage_static \'\\1\' %}"', template)
         context['content'] = Template(template).render(Context(context))
-        context['content'] = mark_safe(bleach.clean(context['content'], tags=allowed_tags, attributes=allowed_attrs))
+        context['content'] = mark_safe(bleach.clean(context['content'], tags=allowed_tags, attributes=allowed_attrs, protocols=allowed_protocols, styles=allowed_styles))
 
         # then render whole mail
         header = "{% load hemres_email %}{% limit_filters %}{% limit_tags emailimage_media emailimage_static if endif %}"
@@ -234,6 +234,7 @@ class Newsletter(SiteRelated):
         # fix relative static urls
         self.content = re.sub('href="([^"]*)"', lambda x: 'href="{}"'.format(request.build_absolute_uri(x.group(1))), self.content)
         self.content = re.sub('src="([^"]*)"', lambda x: 'src="{}"'.format(request.build_absolute_uri(x.group(1))), self.content)
+
 
 @python_2_unicode_compatible
 class NewsletterToList(models.Model):
