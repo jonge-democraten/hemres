@@ -9,5 +9,5 @@ setup(
     author='Jonge Democraten',
     include_package_data=True,
     license='MIT',
-    install_requires=['bleach>=1.5','filelock>=2.0'],
+    install_requires=['bleach>=1.5','filelock>=2.0', 'html2text>=2017.10.4'],
 )
