@@ -144,6 +144,9 @@ class CreateNewsletterForm(Form):
         widget=CheckboxSelectMultipleCss,
         label='Events')
 
+    def __init__(self, data=None, files=None, instance=None, initial=None):
+        super(CreateNewsletterForm, self).__init__(data)
+
 
 class TestEmailForm(Form):
     email = EmailField(max_length=254, label='Emailadres:')
