@@ -106,7 +106,7 @@ class NewsletterAdmin(admin.ModelAdmin):
     def save_form(self, request, form, change):
         # we only want to intercept for adding
         if change:
-            return super(NewsletterAdmin, self).save_form(request, obj, form, True)
+            return super(NewsletterAdmin, self).save_form(request, form, True)
 
         # get the information from the form
         template = form.cleaned_data['template']
