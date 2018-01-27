@@ -1,31 +1,31 @@
 {% extends 'admin/base_site.html' %}
+
 {% load admin_urls admin_modify admin_static static %}
 
-{% block extrastyle %}{{ block.super }}
-<link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}" />
-<link rel="stylesheet" type="text/css" href="{% static "grappelli/css/base.css" %}" />
+{% block content_title %}
+<h1>Testmail versturen</h1>
 {% endblock %}
 
 {% block content %}
-<h1>Testmail versturen</h1>
-<form enctype="multipart/form-data" action="" method="post">
-{% csrf_token %}
-{% for hidden in create_form.hidden_fields %}{{ hidden }}{% endfor %}
-<fieldset class="module aligned">
-<div class="form-row"><p>Vul hieronder je emailadres in om een testmail te krijgen voor de nieuwsbrief '{{ nieuwsbrief }}'</p></div>
-{{ form.non_field_errors }}
-{% for f in form.visible_fields %}
+<div id="content-main">
+    <form enctype="multipart/form-data" action="" method="post">
+        {% csrf_token %}
+        {% for hidden in create_form.hidden_fields %}{{ hidden }}{% endfor %}
+        <fieldset class="module aligned">
+        <div class="form-row"><p>Vul hieronder je emailadres in om een testmail te krijgen voor de nieuwsbrief '{{ nieuwsbrief }}'</p></div>
+        {{ form.non_field_errors }}
+        {% for f in form.visible_fields %}
         <div class="form-row">{{ f.label_tag }}{{ f }}{% if f.errors %}<div class="errors">{{ f.errors.as_text }}</div>{% endif %}</div>
-{% endfor %}
-</fieldset>
-<div class="submit-row"><input class="default" type="submit" value="Versturen" /></div>
-</form>
+        {% endfor %}
+        </fieldset>
+        <div class="submit-row"><input class="default" type="submit" value="Versturen" /></div>
+    </form>
 
-<script type="text/javascript">
-<!-- fix -->
-jQuery(function($) {
-    $(".form-row > label").addClass("required");
-    $("#id_template").addClass('radiolist');
-});
-</script>
+    <script type="text/javascript">
+    <!-- fix -->
+    jQuery(function($) {
+        $(".form-row > label").addClass("required");
+    });
+    </script>
+</div>
 {% endblock %}
