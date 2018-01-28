@@ -128,7 +128,7 @@ class EmailSubscriberForm(ModelForm):
         return result
 
 
-class CreateNewsletterForm(Form):
+class CreateNewsletterForm(ModelForm):
     subject = CharField(required=True, label='Onderwerp')
 
     template = ModelChoiceField(
@@ -144,8 +144,9 @@ class CreateNewsletterForm(Form):
         widget=CheckboxSelectMultipleCss,
         label='Events')
 
-    def __init__(self, data=None, files=None, instance=None, initial=None):
-        super(CreateNewsletterForm, self).__init__(data)
+    class Meta(object):
+        model = models.Newsletter
+        fields = ['subject','template','events']
 
 
 class TestEmailForm(Form):
