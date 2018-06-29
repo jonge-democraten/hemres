@@ -1,30 +1,38 @@
 {% extends 'admin/base_site.html' %}
+
 {% load admin_urls admin_modify admin_static static %}
 
-{% block extrastyle %}{{ block.super }}
-<link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}" />
-<link rel="stylesheet" type="text/css" href="{% static "grappelli/css/base.css" %}" />
+{% block extrastyle %}
+<style>
+    #content-main ul#id_lists { display: inline-block; }
+    #content-main ul#id_lists ul { display: block; }
+</style>
+{% endblock %}
+
+{% block content_title %}
+<h1>Newsletter naar Mailinglist verzenden</h1>
 {% endblock %}
 
 {% block content %}
-<h1>Newsletter naar Mailinglist verzenden</h1>
-<form enctype="multipart/form-data" action="" method="post">
-{% csrf_token %}
-{% for hidden in create_form.hidden_fields %}{{ hidden }}{% endfor %}
-<fieldset class="module aligned">
-{{ form.non_field_errors }}
-{% for f in form.visible_fields %}
-        <div class="form-row">{{ f.label_tag }}{{ f }}{% if f.errors %}<div class="errors">{{ f.errors.as_text }}</div>{% endif %}</div>
-{% endfor %}
-</fieldset>
-<div class="submit-row"><input class="default" type="submit" value="Klaarzetten" /></div>
-</form>
+<div id="content-main">
+    <form enctype="multipart/form-data" action="" method="post">
+        {% csrf_token %}
+        {% for hidden in create_form.hidden_fields %}{{ hidden }}{% endfor %}
+        <fieldset class="module aligned">
+        {{ form.non_field_errors }}
+        {% for f in form.visible_fields %}
+                <div class="form-row">{{ f.label_tag }}{{ f }}{% if f.errors %}<div class="errors">{{ f.errors.as_text }}</div>{% endif %}</div>
+        {% endfor %}
+        </fieldset>
+        <div class="submit-row"><input class="default" type="submit" value="Klaarzetten" /></div>
+    </form>
 
-<script type="text/javascript">
-<!-- fix -->
-jQuery(function($) {
-    $(".form-row > label").addClass("required");
-    $("#id_lists").addClass('radiolist');
-});
-</script>
+    <script type="text/javascript">
+    <!-- fix -->
+    jQuery(function($) {
+        $(".form-row > label").addClass("required");
+        $("#id_lists").addClass('radiolist');
+    });
+    </script>
+</div>
 {% endblock %}

@@ -179,55 +179,6 @@ def compose_mail(emailaddress, embed, request):
     return result, [mime for mime, cid in list(context['attachments'].values())]
 
 
-@staff_member_required
-@permission_required('hemres.add_newsletter')
-def create_newsletter(request):
-    if request.method == 'POST':
-        form = forms.CreateNewsletterForm(request.POST)
-    else:
-        form = forms.CreateNewsletterForm()
-
-    if request.method == 'POST' and form.is_valid():
-        template = form.cleaned_data['template']
-        subject = form.cleaned_data['subject']
-        newsletter = template.create_newsletter(subject=subject)
-        newsletter.content = "<h1>Beste {{naam}},</h1>"
-        newsletter.content += "<p>Introductietekst</p>"
-        if len(form.cleaned_data['events']):
-            newsletter.content += "<h2 id='agenda'>Agenda</h2>"
-        current_site = current_site_id()
-        for o in form.cleaned_data['events']:
-            start = timezone.localtime(o.start_time)
-            end = timezone.localtime(o.end_time)
-            duration = start.strftime('%A, %d %B %Y %H:%M')
-
-            if (start.day == end.day and start.month == end.month and start.year == end.year):
-                duration += ' - {:%H:%M}'.format(end)
-            else:
-                duration += ' - {:%A, %d %B %Y %H:%M}'.format(end)
-
-            protocol = "http"
-            if msettings.SSL_ENABLED:
-                protocol = "https"
-
-            if o.event.site.id != current_site:
-                tag = "<strong>[{}]</strong> ".format(o.event.site.name)
-            else:
-                tag = ""
-
-            newsletter.content += '<h3 class="agendaitem">{}<a href="{}://{}{}">{}</a></h3>'.format(tag, protocol, o.event.site.domain, o.get_absolute_url(), o.title)
-            newsletter.content += "<p>"
-            newsletter.content += "<strong>Wanneer</strong>: {}<br/>".format(duration)
-            newsletter.content += "<strong>Waar</strong>: {}<br/>".format(o.location)
-            newsletter.content += "{}".format(o.event.description)
-            newsletter.content += "</p>"
-        newsletter.save()
-        content_type = ContentType.objects.get_for_model(newsletter.__class__)
-        return redirect(reverse('admin:%s_%s_change' % (content_type.app_label, content_type.model), args=(newsletter.id,)))
-
-    return render(request, 'hemres/create_newsletter.html', {'form': form})
-
-
 def view_newsletter(request, newsletter_pk):
     if request.user.is_active and request.user.is_staff:
         newsletter = get_object_or_404(models.Newsletter, pk=newsletter_pk)

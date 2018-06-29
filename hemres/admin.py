@@ -2,8 +2,12 @@ from __future__ import unicode_literals
 from django.contrib import admin
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.forms import ModelForm
+from django.utils import timezone
+from mezzanine.conf import settings as msettings
+from mezzanine.utils.sites import current_site_id
 from .models import JaneusSubscriber, EmailSubscriber, MailingList, Newsletter, NewsletterTemplate
 from .models import NewsletterToList, NewsletterToSubscriber
+from .forms import CreateNewsletterForm
 
 
 class NewsletterAdminForm(ModelForm):
@@ -28,6 +32,14 @@ class NewsletterAdmin(admin.ModelAdmin):
     search_fields = ('subject', 'content')
 
     def get_fieldsets(self, request, obj=None):
+        if obj is None:
+            fieldsets = (
+                (None, {
+                    'fields': ('subject', 'template', 'events'),
+                }),
+            )
+            return fieldsets
+
         fieldsets = (
             (None, {
                 'fields': ('subject', ),
@@ -75,16 +87,70 @@ class NewsletterAdmin(admin.ModelAdmin):
     prepare_sending.allow_tags = True
     prepare_sending.short_description = 'Send to list'
 
-    def get_urls(self):
-        from django.conf.urls import url
-        from django.views.generic import RedirectView
-        info = self.model._meta.app_label, self.model._meta.model_name
-        urlpatterns = [url(r'^create_newsletter$', RedirectView.as_view(url=reverse_lazy('create_newsletter')), name='%s_%s_add' % info)]
-        return super(NewsletterAdmin, self).get_urls() + urlpatterns
+    def get_form(self, request, obj=None, **kwargs):
+        if obj is None:
+            # for adding
+            return CreateNewsletterForm
+        else:
+            return super(NewsletterAdmin, self).get_form(request, obj, **kwargs)
 
     def save_model(self, request, obj, form, change):
         obj.fix_relative_urls(request)
         obj.save()
+
+    def save_related(self, request, form, formsets, change):
+        # we only want to intercept for adding
+        if change:
+            return super(NewsletterAdmin, self).save_related(request, form, formsets, True)
+
+    def save_form(self, request, form, change):
+        # we only want to intercept for adding
+        if change:
+            return super(NewsletterAdmin, self).save_form(request, form, True)
+
+        # get the information from the form
+        template = form.cleaned_data['template']
+        subject = form.cleaned_data['subject']
+        newsletter = template.create_newsletter(subject=subject)
+
+        # now write the newsletter using some hard-coded (ew) template
+        newsletter.content = "<h1>Beste {{naam}},</h1>"
+        newsletter.content += "<p>Introductietekst</p>"
+
+        # if we want events, add each event (again, hard-coded)
+        if len(form.cleaned_data['events']):
+            newsletter.content += "<h2 id='agenda'>Agenda</h2>"
+        current_site = current_site_id()
+        for o in form.cleaned_data['events']:
+            start = timezone.localtime(o.start_time)
+            end = timezone.localtime(o.end_time)
+            duration = start.strftime('%A, %d %B %Y %H:%M')
+
+            if (start.day == end.day and start.month == end.month and start.year == end.year):
+                duration += ' - {:%H:%M}'.format(end)
+            else:
+                duration += ' - {:%A, %d %B %Y %H:%M}'.format(end)
+
+            # for URLs to the site, look if we have SSL_ENABLED and choose https if so
+            protocol = "http"
+            if msettings.SSL_ENABLED:
+                protocol = "https"
+
+            if o.event.site.id != current_site:
+                tag = "<strong>[{}]</strong> ".format(o.event.site.name)
+            else:
+                tag = ""
+
+            newsletter.content += '<h3 class="agendaitem">{}<a href="{}://{}{}">{}</a></h3>'.format(tag, protocol, o.event.site.domain, o.get_absolute_url(), o.title)
+            newsletter.content += "<p>"
+            newsletter.content += "<strong>Wanneer</strong>: {}<br/>".format(duration)
+            newsletter.content += "<strong>Waar</strong>: {}<br/>".format(o.location)
+            newsletter.content += "{}".format(o.event.description)
+            newsletter.content += "</p>"
+
+        # all events added, save and return!
+        newsletter.save()
+        return newsletter
 
 
 class NewsletterToListAdmin(admin.ModelAdmin):

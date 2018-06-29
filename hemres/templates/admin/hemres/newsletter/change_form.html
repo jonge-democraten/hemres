@@ -1,6 +1,16 @@
 {% extends "admin/change_form.html" %}
 {% block extrahead %}{{ block.super }}
+{% if original %}
 <script type="text/javascript">
 window.__tinymce_css = '{% url 'get_css' original.pk %}';
 </script>
+{% endif %}
+<style>
+#content #newsletter_form ul#id_events {
+    display: inline-block;
+}
+#content #newsletter_form ul#id_events ul {
+    display: block;
+}
+</style>
 {% endblock %}
