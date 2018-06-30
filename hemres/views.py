@@ -310,7 +310,7 @@ def prepare_sending(request, pk):
 
     if request.method == 'POST':
         if form.is_valid():
-            subscriptions_url = request.build_absolute_uri(reverse(view_home))
+            subscriptions_url = request.build_absolute_uri(reverse(unsubscribe_landing, kwargs={'token': 'DUMMYTOKEN'}))
             newsletter.prepare_sending(form.cleaned_data['lists'], subscriptions_url)
             content_type = ContentType.objects.get_for_model(newsletter.__class__)
             return redirect(reverse('admin:%s_%s_changelist' % (content_type.app_label, content_type.model)))

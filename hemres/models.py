@@ -282,6 +282,9 @@ class NewsletterToList(models.Model):
 
     @transaction.atomic
     def process(self):
+        """
+        Send the newsletter to the list by creating NewsletterToSubscriber objects.
+        """
         if self.sent:
             return  # only send once
 
@@ -291,9 +294,11 @@ class NewsletterToList(models.Model):
         # Then send to all subscribers from database
         for sub in self.target_list.subscribers.all():
             sub = sub.cast()
+            unsub_token = sub.create_or_get_unsubscribe_token()
+            unsub_url = self.subscriptions_url.replace('DUMMYTOKEN', unsub_token)
             if type(sub) is EmailSubscriber and not len(req):
                 a = NewsletterToSubscriber(newsletter=self.newsletter,
-                                           subscriptions_url=self.subscriptions_url,
+                                           subscriptions_url=unsub_url,
                                            target_list=self.target_list,
                                            target_name=sub.name,
                                            target_email=sub.email)
@@ -312,7 +317,7 @@ class NewsletterToList(models.Model):
                         send_it = len(req.intersection(groups)) > 0
                     if send_it:
                         a = NewsletterToSubscriber(newsletter=self.newsletter,
-                                                   subscriptions_url=self.subscriptions_url,
+                                                   subscriptions_url=unsub_url,
                                                    target_list=self.target_list,
                                                    target_name=name,
                                                    target_email=mail)
