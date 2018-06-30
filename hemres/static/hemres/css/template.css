@@ -68,11 +68,16 @@ body, p, li { font: normal 14px/16px Arial, Helvetica, sans-serif; }
 #container { width: 870px; margin: 20px auto; }
 
 body { background: #eee; }
+.niceframe,
 .formpart { background: #fff; }
 
+.niceframe,
 .formpart { margin: 2em 0; padding: 1.5em 2em; }
+.niceframe,
 .formpart { border: 1px solid #ddd; box-shadow: 0px 0px 1px 0px #578439; }
+.niceframe h3, .niceframe .title,
 .formpart h3, .formpart .title { margin: 0 0 1em 0; }
+.niceframe h3, .niceframe .title,
 .formpart h3, .formpart .title { font-weight: bold; font-size: 16px; letter-spacing: 1px; color: #578439; }
 .formpart .question label { display: block; margin-bottom: .1em; }
 .formpart .text, .formpart .question, .formpart .checkbox, .formpart .submit { display: block; margin: 1em 0 0 0; }
@@ -85,6 +90,7 @@ li label { font-weight: normal; font-size: 90%; }
 label:hover { text-decoration: underline; }
 .formpart div:hover { background-color: #f4f4f4; }
 
+.jdbutton, .jdbutton:hover, .jdbutton:visited,
 input[type="submit"] {
   background: #578439 url('https://jongedemocraten.nl/templates/jd/images/TitleBackground.png'); background-repeat: repeat-x;
   border-radius: 2px; border: 1px solid #353;
@@ -95,6 +101,9 @@ input[type="submit"] {
   padding: .2em 20px;
   color: white;
   cursor: pointer;
+}
+.jdbutton, .jdbutton:hover, .jdbutton:visited {
+  height: 1.2em;
 }
 
 input, select { vertical-align:middle; display: inline-block;}
