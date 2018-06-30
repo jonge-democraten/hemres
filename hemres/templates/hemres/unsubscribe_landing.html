@@ -1,0 +1,19 @@
+{% extends 'hemres/base.html' %}
+{% block content %}
+<div class="niceframe">
+<div class="title">Jonge Democraten Nieuwsbrieven</div>
+<div class="text">
+<p>Je hebt in de nieuwsbrief gekozen voor de optie om je af te melden voor nieuwsbrieven van de Jonge Democraten. Je hebt twee mogelijkheden.</p>
+<hr />
+<a class="jdbutton" href="{{ for_real_url }}">Direct afmelden</a>
+<p>
+Met deze optie wordt per direct je informatie uit het systeem verwijderd en ben je
+niet langer geabonneerd op de nieuwsbrieven.
+Je krijgt een bevestiging per email dat deze wijziging is doorgevoerd.
+Dit is om te voorkomen dat iemand die een nieuwsbrief heeft doorgestuurd ongemerkt door een ander kan worden uitgeschreven.</p>
+<hr />
+<a class="jdbutton" href="{{ send_token_url }}">Abonnementen beheren</a>
+<p>Met deze optie krijg je een persoonlijke email toegestuurd om je abonnementen in te stellen. Hiermee kun je je inschrijven en uitschrijven bij nieuwsbrieven van de Jonge Democraten.</p>
+</div>
+</div>
+{% endblock %}

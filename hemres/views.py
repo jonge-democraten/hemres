@@ -65,6 +65,75 @@ def subscriptions_done(request):
     return render(request, 'hemres/subscriptions_manage_done.html')
 
 
+def unsubscribe_landing(request, token):
+    sub = get_object_or_404(models.Subscriber, unsubscribe_token=token)
+    send_token_url = request.build_absolute_uri(reverse(unsubscribe_sendmail, kwargs={'token': token}))
+    for_real_url = request.build_absolute_uri(reverse(unsubscribe_unsub, kwargs={'token': token}))
+    return render(request, 'hemres/unsubscribe_landing.html',
+                  {'send_token_url': send_token_url, 'for_real_url': for_real_url, 'name': sub.name})
+
+
+def compose_unsubscribed_mail(request, name, embed):
+    home_url = request.build_absolute_uri(reverse(view_home))
+
+    context = {'home_url': home_url,
+               'render_mail': embed,
+               'attachments': {},
+               'name': name}
+    result = render_to_string('hemres/unsubscribe_email.html', context)
+    return result, [mime for mime, cid in list(context['attachments'].values())]
+
+
+def unsubscribe_sendmail(request, token):
+    sub = get_object_or_404(models.Subscriber, unsubscribe_token=token).cast()
+    if type(sub) is models.EmailSubscriber:
+        email = sub.email
+    elif type(sub) is models.JaneusSubscriber:
+        if not hasattr(settings, 'JANEUS_SERVER'):
+            raise Http404()
+        res = Janeus().by_lidnummer(sub.member_id)
+        if res is None:
+            raise Http404()
+        dn, attrs = res
+        email = attrs['mail'][0]
+    if getattr(settings, 'SKIP_EMAIL', False):
+        email_to_send, attachments = compose_mail(email, False, request=request)
+        return HttpResponse(email_to_send, content_type='text/html')
+    else:
+        email_to_send, attachments = compose_mail(email, True, request=request)
+        send_an_email(email, email_to_send, attachments)
+        return render(request, 'hemres/subscriptions_emailsent.html', {'email': email})
+
+
+def unsubscribe_unsub(request, token):
+    sub = get_object_or_404(models.Subscriber, unsubscribe_token=token).cast()
+    # get data to send email after
+    if type(sub) is models.EmailSubscriber:
+        name = sub.name
+        email = sub.email
+    elif type(sub) is models.JaneusSubscriber:
+        if not hasattr(settings, 'JANEUS_SERVER'):
+            sub.delete()
+            raise Http404()
+        res = Janeus().by_lidnummer(sub.member_id)
+        if res is None:
+            sub.delete()
+            raise Http404()
+        dn, attrs = res
+        name = sub.name
+        email = attrs['mail'][0]
+    # now delete the subscriber
+    sub.delete()
+    # now send an email
+    if getattr(settings, 'SKIP_EMAIL', False):
+        email_to_send, attachments = compose_unsubscribed_mail(request, name, False)
+        return HttpResponse(email_to_send, content_type='text/html')
+    else:
+        email_to_send, attachments = compose_unsubscribed_mail(request, name, True)
+        send_an_email(email, email_to_send, attachments)
+        return render(request, 'hemres/subscriptions_manage_done.html')
+
+
 class ManageEmailSubscriptions(UpdateView):
     model = models.EmailSubscriber
     form_class = forms.EmailSubscriberForm
