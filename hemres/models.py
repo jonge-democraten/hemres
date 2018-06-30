@@ -10,6 +10,8 @@ from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.safestring import mark_safe
 from janeus import Janeus
+import hashlib
+import os
 import re
 import bleach
 import html2text
@@ -25,8 +27,14 @@ except:
 class Subscriber(models.Model):
     name = models.CharField(max_length=255, blank=True, default='')
     subscriptions = models.ManyToManyField('MailingList', related_name='subscribers', blank=True)
+    unsubscribe_token = models.CharField(max_length=255, blank=True, default='')
 
     def cast(self):
+        """
+        Use this method to case the subscriber to either a JaneusSubscriber
+        or a EmailSubscriber instance.
+        Returns None if this is not a subscriber from LDAP or Email.
+        """
         try:
             return self.janeussubscriber
         except JaneusSubscriber.DoesNotExist:
@@ -35,9 +43,28 @@ class Subscriber(models.Model):
             return self.emailsubscriber
         except EmailSubscriber.DoesNotExist:
             pass
+        return None
 
     def __str__(self):
         return self.cast().__str__()
+
+    def create_or_get_unsubscribe_token(self):
+        """
+        Either obtain the unsubscribe token for this subscriber or create a
+        new one.
+        """
+        if self.unsubscribe_token is None or self.unsubscribe_token == '':
+            token = hashlib.sha256(os.urandom(64)).hexdigest()
+            self.unsubscribe_token = token + str(self.pk)
+            self.save()
+        return self.unsubscribe_token
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)  # Call the "real" save() method.
+        if self.unsubscribe_token is None or self.unsubscribe_token == '':
+            token = hashlib.sha256(os.urandom(64)).hexdigest()
+            self.unsubscribe_token = token + str(self.pk)
+            super().save(*args, **kwargs)  # Do it again!
 
 
 @python_2_unicode_compatible
