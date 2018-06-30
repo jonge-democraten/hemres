@@ -106,3 +106,11 @@ To Subscriber" object for each subscriber.
 Finally, each "Newsletter To Subscriber" object is processed either automatically
 or manually (from the admin page). The newsletter is rendered and sent to that
 subscriber and the "Newsletter To Subscriber" object is removed from the database.
+
+For developers
+----
+To quickly get started, use `build_env.sh` to create an environment.
+Then copy in `nieuws` the file `settings.py.dist` to `settings.py`.
+Edit this file. Update the `SECRET_KEY`. The rest is optional.
+By default, no emails are actually sent and if the Janeus options are
+not configured, there will not be a LDAP bridge.
