@@ -54,7 +54,8 @@ def view_home(request):
                 email_to_send, attachments = compose_mail(email, False, request=request)
                 return HttpResponse(email_to_send, content_type='text/html')
             else:
-                send_subscriber_mail(email, request=request)
+                email_to_send, attachments = compose_mail(email, True, request=request)
+                send_an_email(email, email_to_send, attachments)
                 return render(request, 'hemres/subscriptions_emailsent.html', {'email': email})
 
     return render(request, 'hemres/home.html', {'form': form})
@@ -128,9 +129,7 @@ def create_fresh_email_token(subscriber):
     return t
 
 
-def send_subscriber_mail(emailaddress, request):
-    # knowledge of 'request' necessary to compose mail
-    html_content, attachments = compose_mail(emailaddress, True, request=request)
+def send_an_email(emailaddress, html_content, attachments):
     h = html2text.HTML2Text()
     h.ignore_images = True
     text_content = h.handle(html_content)
