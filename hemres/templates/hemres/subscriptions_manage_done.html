@@ -4,6 +4,16 @@
     {% csrf_token %}
     {% for hidden in create_form.hidden_fields %}{{ hidden }}{% endfor %}
     <div class="title">Jonge Democraten Nieuwsbrieven</div>
-    <div class="text"><p>De nieuwsbrieven zijn ingesteld.</p></div>
+    <div class="text">
+<p>Jouw voorkeuren voor nieuwsbrieven van de Jonge Democraten zijn in het
+systeem verwerkt.</p>
+<p>Je kunt in de toekomst je voorkeuren aanpassen op dezelfde manier
+als je zojuist hebt gedaan. Je kunt ook gebruik maken van de uitschrijflink
+in ontvangen nieuwsbrieven als je je wilt aanmelden of afmelden
+voor onze nieuwsbrieven.</p>
+<p>Mocht je geen lid van de JD zijn en je hebt je niet meer geabonneerd
+op een van onze nieuwsbrieven, dan wordt je emailadres automatisch uit het systeem
+verwijderd.</p>
+</div>
 </div>
 {% endblock %}
