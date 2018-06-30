@@ -332,6 +332,6 @@ class NewsletterToSubscriber(models.Model):
         for a in attachments:
             msg.attach(a)
 
-        if not getattr(settings, 'HEMRES_DONT_EMAIL', False):
+        if not getattr(settings, 'SKIP_EMAIL', False):
             msg.send()
         self.delete()

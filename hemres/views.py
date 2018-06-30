@@ -50,7 +50,7 @@ def view_home(request):
     if request.method == 'POST':
         if form.is_valid():
             email = form.cleaned_data['email']
-            if getattr(settings, 'HEMRES_DONT_EMAIL', False):
+            if getattr(settings, 'SKIP_EMAIL', False):
                 email_to_send, attachments = compose_mail(email, False, request=request)
                 return HttpResponse(email_to_send, content_type='text/html')
             else:
@@ -221,7 +221,7 @@ def test_newsletter(request, pk):
             for a in attachments:
                 msg.attach(a)
 
-            if getattr(settings, 'HEMRES_DONT_EMAIL', False):
+            if getattr(settings, 'SKIP_EMAIL', False):
                 return HttpResponse(msg.message().as_string(), content_type="message")
             else:
                 msg.send()
