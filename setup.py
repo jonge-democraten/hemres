@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='hemres',
-    version='0.18',
+    version='0.26',
     description='Newsletter module for Jonge Democraten websites',
     packages=find_packages(),
     url='http://github.com/jonge-democraten/hemres/',
