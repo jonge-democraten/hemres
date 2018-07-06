@@ -95,7 +95,9 @@ def unsubscribe_sendmail(request, token):
         if res is None:
             raise Http404()
         dn, attrs = res
-        email = attrs['mail'][0]
+        email = str(attrs['mail'][0])
+    else:
+        raise Http404()
     if getattr(settings, 'SKIP_EMAIL', False):
         email_to_send, attachments = compose_mail(email, False, request=request)
         return HttpResponse(email_to_send, content_type='text/html')
