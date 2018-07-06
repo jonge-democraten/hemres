@@ -17,6 +17,8 @@ import bleach
 import html2text
 
 
+# If we have Mezzanine, just use that SiteRelated functionality
+# Otherwise, use fallback functionality so we can use Hemres standalone (without Mezzanine)
 try:
     from mezzanine.core.models import SiteRelated
 except:

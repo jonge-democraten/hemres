@@ -1,4 +1,6 @@
-""" Copyright Mezzanine """
+"""
+Based on the SiteRelated functionality offered in Mezzanine.
+"""
 
 from django.contrib.sites.models import Site
 from django.contrib.sites.managers import CurrentSiteManager as DjangoCSM
