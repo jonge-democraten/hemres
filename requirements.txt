@@ -1,3 +1,6 @@
-Django==1.8
+Django>=1.11,<2.0
 filelock==2.0
--e git+https://github.com/jonge-democraten/janeus@1.5#egg=janeus
+bleach>=1.5
+inlinestyler==0.2.5
+-e git+https://github.com/jonge-democraten/janeus@1.6#egg=janeus
+django-tinymce==2.8.0

@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-from future.builtins import open
 from django import template
 from django.contrib.staticfiles import finders
 from django.core.files.storage import default_storage

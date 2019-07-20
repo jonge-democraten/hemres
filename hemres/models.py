@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-from future.builtins import str
 from datetime import timedelta
 from django.db import models, transaction
 from django.conf import settings

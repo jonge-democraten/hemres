@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-from future.builtins import int
 from datetime import datetime, timedelta
 from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required

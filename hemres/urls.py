@@ -1,20 +1,18 @@
-from __future__ import unicode_literals
-from django.conf.urls import patterns, url
-from . import views
+from django.conf.urls import url
+from .views import *
 
-urlpatterns = patterns(
-    '',
-    url(r'^$', views.view_home, name='home'),
-    url(r'^subscriptions/e/(?P<subscriber>\d+)/(?P<token>.+)/$', views.ManageEmailSubscriptions.as_view(), name='subscriptions_email'),
-    url(r'^subscriptions/j/(?P<subscriber>\d+)/(?P<token>.+)/$', views.ManageJaneusSubscriptions.as_view(), name='subscriptions_janeus'),
-    url(r'^subscriptions/done/$', views.subscriptions_done),
-    url(r'^subscriptions/u/(?P<token>.+)/$', views.unsubscribe_landing),
-    url(r'^subscriptions/a/(?P<token>.+)/$', views.unsubscribe_sendmail),
-    url(r'^subscriptions/U/(?P<token>.+)/$', views.unsubscribe_unsub),
-    url(r'^view/(?P<newsletter_pk>\d+)/$', views.view_newsletter, name='view_newsletter'),
-    url(r'^test/(?P<pk>\d+)$', views.test_newsletter, name='test_newsletter'),
-    url(r'^prepare/(?P<pk>\d+)$', views.prepare_sending, name='prepare_sending'),
-    url(r'^process/(?P<pk>\d+)$', views.process_sending, name='process_sending'),
-    url(r'^list/$', views.list_all, name='list_all'),
-    url(r'^css/(?P<pk>\d+)$', views.get_css, name='get_css'),
-)
+urlpatterns = [
+    url(r'^$', view_home, name='home'),
+    url(r'^subscriptions/e/(?P<subscriber>\d+)/(?P<token>.+)/$', ManageEmailSubscriptions.as_view(), name='subscriptions_email'),
+    url(r'^subscriptions/j/(?P<subscriber>\d+)/(?P<token>.+)/$', ManageJaneusSubscriptions.as_view(), name='subscriptions_janeus'),
+    url(r'^subscriptions/done/$', subscriptions_done),
+    url(r'^subscriptions/u/(?P<token>.+)/$', unsubscribe_landing),
+    url(r'^subscriptions/a/(?P<token>.+)/$', unsubscribe_sendmail),
+    url(r'^subscriptions/U/(?P<token>.+)/$', unsubscribe_unsub),
+    url(r'^view/(?P<newsletter_pk>\d+)/$', view_newsletter, name='view_newsletter'),
+    url(r'^test/(?P<pk>\d+)$', test_newsletter, name='test_newsletter'),
+    url(r'^prepare/(?P<pk>\d+)$', prepare_sending, name='prepare_sending'),
+    url(r'^process/(?P<pk>\d+)$', process_sending, name='process_sending'),
+    url(r'^list/$', list_all, name='list_all'),
+    url(r'^css/(?P<pk>\d+)$', get_css, name='get_css'),
+]

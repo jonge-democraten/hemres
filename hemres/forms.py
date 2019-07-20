@@ -1,15 +1,14 @@
-from __future__ import unicode_literals
-from future.builtins import super
-from future.builtins import str
-from future.builtins import int
-from builtins import object
 from django.contrib.sites.models import Site
 from django.forms import Form, EmailField, ModelForm, ModelMultipleChoiceField, ModelChoiceField, CharField
-from django.forms.widgets import CheckboxSelectMultiple, CheckboxFieldRenderer, CheckboxChoiceInput, RadioSelect
+from django.forms.widgets import CheckboxSelectMultiple, RadioSelect
 from django.utils.safestring import mark_safe
+import logging
 import re
 
 from . import models
+
+
+logger = logging.getLogger(__name__)
 
 
 try:
@@ -44,46 +43,6 @@ class SubscriptionEmailRecaptchaForm(SubscriptionEmailForm):
         self.captcha = ReCaptchaField()
 
 
-class CheckboxChoiceInputDisabled(CheckboxChoiceInput):
-    def __init__(self, *args, **kwargs):
-        disabledset = kwargs.pop('disabledset', None)
-        super(CheckboxChoiceInputDisabled, self).__init__(*args, **kwargs)
-        self.disabledset = set([str(x.pk) for x in disabledset])
-        if self.choice_value in self.disabledset:
-            self.attrs['disabled'] = 'disabled'
-
-
-class CheckboxFieldDisabledRenderer(CheckboxFieldRenderer):
-    def choice_input_class(self, *args, **kwargs):
-        kwargs = dict(kwargs, disabledset=self.disabledset)
-        return CheckboxChoiceInputDisabled(*args, **kwargs)
-
-
-class CheckboxSelectMultipleDisabled(CheckboxSelectMultiple):
-    def renderer(self, *args, **kwargs):
-        instance = CheckboxFieldDisabledRenderer(*args, **kwargs)
-        instance.disabledset = self.disabledset
-        return instance
-
-
-class CheckboxSelectMultipleRenderer(CheckboxFieldRenderer):
-    def render(self):
-        result = super(CheckboxSelectMultipleRenderer, self).render()
-        return mark_safe(re.sub("<ul id", '<ul class="checkboxlist" id', result, count=1))
-
-
-class CheckboxSelectMultipleCss(CheckboxSelectMultiple):
-    renderer = CheckboxSelectMultipleRenderer
-
-
-class ModelMultipleChoiceFieldDisabled(ModelMultipleChoiceField):
-    widget = CheckboxSelectMultipleDisabled
-
-    def __init__(self, disabledset=[], *args, **kwargs):
-        super(ModelMultipleChoiceFieldDisabled, self).__init__(*args, **kwargs)
-        self.widget.disabledset = disabledset
-
-
 class EventField(ModelMultipleChoiceField):
     def __deepcopy__(self, memo):
         result = super(EventField, self).__deepcopy__(memo)
@@ -109,8 +68,9 @@ class EventField(ModelMultipleChoiceField):
 
 
 class JaneusSubscriberForm(ModelForm):
-    subscriptions = ModelMultipleChoiceFieldDisabled(
+    subscriptions = ModelMultipleChoiceField(
         queryset=models.MailingList.objects.order_by('name'),
+        widget=CheckboxSelectMultiple,
         required=False,
         label='Nieuwsbrieven')
 
@@ -164,12 +124,16 @@ class CreateNewsletterForm(ModelForm):
     events = EventField(
         queryset=get_upcoming_events(),
         required=False,
-        widget=CheckboxSelectMultipleCss,
+        widget=CheckboxSelectMultiple,
         label='Events')
 
     class Meta(object):
         model = models.Newsletter
         fields = ['subject','template','events']
+
+    def __init__(self, *args, **kwargs):
+        super(CreateNewsletterForm, self).__init__(*args, **kwargs)
+        self.fields['events'].widget.attrs['class'] = 'checkboxlist'
 
 
 class TestEmailForm(Form):
